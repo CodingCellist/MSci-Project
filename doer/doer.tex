@@ -1,9 +1,14 @@
-\documentclass{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
 \usepackage{indentfirst}
 
-\usepackage{todonotes}
+\usepackage{hyperref}
+\usepackage{url}
+
+\hypersetup{colorlinks=True
+            , urlcolor=blue
+           }
 
 \title{CS5199: Individual Masters Project\\DOER}
 \author{\textbf{Student:} Thomas E. Hansen (150015673)\\\textbf{Supervisor:}
@@ -15,33 +20,35 @@
     \maketitle
     
     \section{Description}
-    \begin{itemize}
-        \item something about scheduling
-        \item something about ARM? big.LITTLE? Mobile processors?
-        \item something about power consumption?
-        \item something about dynamic frequency scaling?
-    \end{itemize}
+    This project aims to investigate Dynamic Voltage Loop Scheduling (DVLS) for
+    ARM ``big.LITTLE'' processors. This will be done by using the
+    \href{http://www.gem5.org/Main_Page}{gem5 simulator} to measure energy
+    consumption and performance impacts. Additionally, an ARM development board
+    will be used to test the software developed on real hardware. The project
+    will involve developing new methods for adjusting the voltage of CPUs in a
+    runtime, e.g. the Linux scheduler or a governor.
     
     \section{Objectives}
         \subsection{Primary}
         \begin{itemize}
-            \item Become familiar with the gem5 simulator
-            \item Use gem5 to explore the gains that dynamic voltage regulation
-                  may bring to certain tasks
-            \item Examine how this may be done automatically in a scheduler
+            \item Become familiar with the gem5 simulator.
+            \item Use gem5 to explore the impact that DVLS may have on certain
+                  tasks.
+            \item Examine how DVLS may be done automatically in a runtime.
         \end{itemize}
         
         \subsection{Secondary}
         \begin{itemize}
-            \item Implement the scheduling heuristics in the Linux scheduler
-            \item Analyse the effects of the new scheduler using the gem5
-                  simulator
+            \item Implement the DVLS heuristics in the Linux scheduler or
+                  implement a governor.
+            \item Analyse the effects of the new runtime using the gem5
+                  simulator.
         \end{itemize}
         
         \subsection{Ternary}
         \begin{itemize}
-            \item Analyse the effects of the new scheduler using an ARM
-                  development board, i.e. on real hardware
+            \item Analyse the effects of the new runtime using an ARM
+                  development board.
         \end{itemize}
         
     \section{Ethics}
