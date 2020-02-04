@@ -3,3 +3,7 @@
 
 **Supervisor:** Dr. John Thomson
 
+## Tools Used
+- [gem5](http://www.gem5.org/)
+- [ARMv8 cross compiler](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads)
+
