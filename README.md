@@ -7,6 +7,7 @@
 # Tools Used
 - [gem5](http://www.gem5.org/)
 - [ARMv8 cross compiler](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads)
+- [gemstone-applypower](https://github.com/mattw200/gemstone-applypower)
 
 
 # gem5 details
@@ -24,6 +25,24 @@ A working index can be found on the old
 [m5sim](http://m5sim.org/dist/current/arm/) page. These files should then be
 retrieved from
 [dist.gem5.org/dist/current/arm/](http://dist.gem5.org/dist/current/arm/)
+
+
+# gemstone details
+## Tutorials
+- [gemstone-applypower](http://gemstone.ecs.soton.ac.uk/gemstone-website/gemstone/tutorial-gemstone-apply-power.html)
+
+## Commands used
+(Assumes having `cd`-ed into `gemstone-applypower` and activated the venv)
+
+For simulating Cortex A15
+```
+$ ./gemstone_create_equation.py -p models/gs-A15.params -m maps/gem5-A15.map -o gem5-A15
+```
+
+For simulating Cortex A7
+```
+$ ./gemstone_create_equation.py -p models/gs-A7.params -m maps/gem5-A7.map -o gem5-A7
+```
 
 
 # Misc.
