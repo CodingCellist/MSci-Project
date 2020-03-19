@@ -9,11 +9,21 @@
 - [ARMv8 cross compiler](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads)
 
 
-# Patches for gem5
+# gem5 details
+## Patches
 - [power: Fix regStats for PowerModel and PowerModelState](https://gem5-review.googlesource.com/c/public/gem5/+/26643)
 - [sim-power: Fix power model to work with stat groups](https://gem5-review.googlesource.com/c/public/gem5/+/26785)
 
 Applied using `git-cherry-pick`
+
+## Linux images used
+- [linux-aarch64-20170616](http://dist.gem5.org/dist/current/arm/aarch-system-20170616.tar.xz)
+- [linux-aarch64-201901106](http://dist.gem5.org/dist/current/arm/aarch-system-201901106.tar.bz2)
+
+A working index can be found on the old
+[m5sim](http://m5sim.org/dist/current/arm/) page. These files should then be
+retrieved from
+[dist.gem5.org/dist/current/arm/](http://dist.gem5.org/dist/current/arm/)
 
 
 # Misc.
