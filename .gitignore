@@ -4,6 +4,9 @@
 # linux images
 gem5/linux-systems
 
+# ARM cross-compile tools
+gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+
 # Misc.
 restart.sh
 
