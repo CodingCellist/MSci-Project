@@ -1,0 +1,2 @@
+./build/ARM/gem5.opt configs/example/arm/fs_bigLITTLE.py --dtb=$M5_PATH/binaries/armv8_gem5_v1_big_little_2_2.20170616.dtb --kernel=$M5_PATH/binaries/vmlinux.vexpress_gem5_v1_64.20170616 --machine-type=VExpress_GEM5_V1 --disk=$M5_PATH/disks/linaro-minimal-aarch64.img --caches --bootscript=../gem5-bootscripts/my_login_bootscript.rcS
+
