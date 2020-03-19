@@ -26,6 +26,40 @@ A working index can be found on the old
 retrieved from
 [dist.gem5.org/dist/current/arm/](http://dist.gem5.org/dist/current/arm/)
 
+## Running
+### Setup
+```bash
+$ cd gem5
+$ export M5_PATH=path/to/linux/files
+```
+### Commands
+Both the commands below can further be customised by the flags:
+- `--big-cpus N`
+- `--little-cpus N`
+- `--big-cpu-clock HZ`
+- `--little-cpu-clock HZ`
+
+Full system simulation without power:
+```bash
+$ ./build/ARM/gem5.opt configs/example/arm/fs_bigLITTLE.py \
+    --dtb=$M5_PATH/binaries/<dtb-name>.dtb \
+    --kernel=$M5_PATH/binaries/<kernel-name> \
+    --machine-type=VExpress_GEM5_V1 \
+    --disk=$M5_PATH/disks/<disk-image-name>.img \
+    --caches \
+    --bootscript=path/to/bootscript.rcS
+```
+Full system simulation with power:
+```bash
+$ ./build/ARM/gem5.opt configs/example/arm/fs_bigLITTLE.py \
+    --dtb=$M5_PATH/binaries/<dtb-name>.dtb \
+    --kernel=$M5_PATH/binaries/<kernel-name> \
+    --machine-type=VExpress_GEM5_V1 \
+    --disk=$M5_PATH/disks/<disk-image-name>.img \
+    --caches \
+    --bootscript=path/to/bootscript.rcS
+```
+
 
 # gemstone details
 ## Tutorials
