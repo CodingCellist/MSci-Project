@@ -1,0 +1,3 @@
+[submodule "gem5"]
+	path = gem5
+	url = git@gitlab.cs.st-andrews.ac.uk:teh6/gem5.git
