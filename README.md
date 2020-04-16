@@ -25,6 +25,42 @@ A working index can be found on the old
 [m5sim](http://m5sim.org/dist/current/arm/) page. These files should then be
 retrieved from
 [dist.gem5.org/dist/current/arm/](http://dist.gem5.org/dist/current/arm/)
+### Creating a disk image
+1. Create a new file of (in this case, 1024B*1024 = 1GiB) zeros using
+   ```bash
+   $ dd if=/dev/zero of=path/to/file.img bs=1024 count=1024
+   ```
+   (you may need to be root or use `sudo` for the next couple of steps)
+2. Find the next available loopback device
+   ```bash
+   $ losetup -f
+   ```
+3. Set up the device returned (e.g. `/dev/loop0`) with the image file at offset
+   32256 (63 * 512 bytes; something to do with tracks, see
+   [this](https://www.gem5.org/documentation/general_docs/fullsystem/disks))
+   ```bash
+   $ losetup -o 32256 /dev/loop0 path/to/file.img
+   ```
+4. Format the device
+   ```bash
+   $ mke2fs /dev/loop0
+   ```
+5. Detach the loopback device
+   ```bash
+   $ losetup -d /dev/loop0
+   ```
+
+Done. The image can now be mounted and manipulated using
+```bash
+$ mount -o loop,offset=32256 path/to/file.img path/to/mountpoint
+```
+
+**IMPORTANT: remember to copy the GNU/*NIX binaries necessary for the system
+you'll be emulating to their appropriate locations on the new disk**
+
+Some details about what to do next can be found here:
+- [gem5-specific files](https://www.gem5.org/documentation/general_docs/fullsystem/disks#setting-up-gem5-specific-files)
+- [m5 utility](https://www.gem5.org/documentation/general_docs/m5ops/)
 
 ## Running
 ### Setup
