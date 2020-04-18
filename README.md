@@ -62,6 +62,139 @@ Some details about what to do next can be found here:
 - [gem5-specific files](https://www.gem5.org/documentation/general_docs/fullsystem/disks#setting-up-gem5-specific-files)
 - [m5 utility](https://www.gem5.org/documentation/general_docs/m5ops/)
 
+## DVFS details
+The gem5 devs/website openly admits that the DVFS documentation
+[is outdated](https://www.gem5.org/about/#power-and-energy-modeling), leading
+the user to having to manually read their way through source code and example
+config scripts to try to figure out how to construct the relevant components.
+This my attempt at documenting and understanding how it works.
+### Voltage Domains
+Voltage Domains dictate the voltage values the system can use. It seems gem5
+always simulates voltage in FS mode, but simply sets it to 1.0V if the user does
+not care about voltage simulation (see `src/sim/VoltageDomain.py`)
+
+To create a voltage domain, either a voltage value or a list of voltage values
+must be given. But not just to the `VoltageDomain` constructor, no that would
+be too simple, but instead as a keyword-argument (kwarg), i.e. `voltage`. To my
+knowledge, this is not documented anywhere, nor is it easily discoverable from
+the `src/sim/{VoltageDomain.py, voltage_domain.hh, voltage_domain.cc}` files.
+
+The example voltage domains I've used are (note that the values have to be 
+specified in descending order):
+
+For the big cluster:
+```python
+odroid_n2_voltages = [  '0.981000V'
+                      , '0.891000V'
+                      , '0.861000V'
+                      , '0.821000V'
+                      , '0.791000V'
+                      , '0.771000V'
+                      , '0.771000V'
+                      , '0.751000V'
+                     ]
+odroid_n2_voltage_domain = VoltageDomain(voltage=odroid_n2_voltages)
+```
+
+For the LITTLE cluster:
+```python
+odroid_n2_voltages = [  '0.981000V'
+                      , '0.861000V'
+                      , '0.831000V'
+                      , '0.791000V'
+                      , '0.761000V'
+                      , '0.731000V'
+                      , '0.731000V'
+                      , '0.731000V'
+                     ]
+odroid_n2_voltage_domain = VoltageDomain(voltage=odroid_n2_voltages)
+```
+
+These numbers were obtained by examining the changes in the sysfs files
+`/sys/class/regulator/regulator.{1,2}/microvolts` when using the `userspace`
+frequency governor and varying the frequency of the big and LITTLE clusters
+(respectively) using the `cpupower` command-line tool.
+
+**NOTE:** In gem5 (and, as far as I know, on real hardware) voltage domains
+apply to CPU sockets. So make sure that the big and LITTLE clusters in the
+simulator are on different sockets if they need to have different voltage
+domains (you can inspect the socket through the `socket_id` value associated
+with the clusters)
+### Clock Domains
+Clock domains dictate what frequencies the CPU(s) can be clocked at (what steps
+are available for the DVFS handler) and are associated with a Voltage Domain. I
+am uncertain as to what precisely the requirements are for the relationship
+between these two, especially as the constructor does not seem to complain if
+there is a different number of values in the available clocks and voltages.
+
+I obtained the following clock values from the Odroid N2 board using the
+`cpupower` command-line tool:
+
+For the big cluster:
+```python
+odroid_n2_clocks = [  '1800MHz'
+                    , '1700MHz'
+                    , '1610MHz'
+                    , '1510MHz'
+                    , '1400MHz'
+                    , '1200MHz'
+                    , '1000MHz'
+                    ,  '667MHz'
+                   ]
+odroid_n2_clk_domain = SrcClockDomain(clock=odroid_n2_clocks,
+                                      voltage_domain=odroid_n2_voltage_domain
+                                      )
+```
+
+For the LITTLE cluster:
+```python
+odroid_n2_clocks = [  '1900MHz'
+                    , '1700MHz'
+                    , '1610MHz'
+                    , '1510MHz'
+                    , '1400MHz'
+                    , '1200MHz'
+                    , '1000MHz'
+                    ,  '667MHz'
+                   ]
+odroid_n2_clk_domain = SrcClockDomain(clock=odroid_n2_clocks,
+                                      voltage_domain=odroid_n2_voltage_domain
+                                      )
+```
+### Adding DVFS to an existing CPU
+AHAHAHAHAHAHAHAHAHAHAHAHAHAHA! Nothing is ~~simple~~ intuitive in this thing, is
+it??   \*Hrm, hrm\* Anyway...
+
+As can be seen in the example `configs/example/arm/fs_bigLITTLE.py` script, the
+CPUs are located in a seemingly magic `ObjectList.cpu_list`. This list can be
+printed to stdout by calling `ObjectList.cpu_list.print()` anywhere in the
+scripts using it. Unfortunately, the attributes of the SimObjects cannot be
+modified once instantiated, so in order to add custom DVFS to any existing CPU,
+we have to extend it. The example FS script imports some CPU things from
+`common.cores.arm`, so you'd be forgiven for thinking you can extend a CPU by
+importing the relevant file and extending the CPU class found in it.
+
+Well yes, but actually no.
+
+It turns out the magical `ObjectList` (whose source code can be found in
+`configs/common/ObjectList.py`) can only see CPUs if they're in the
+`configs/common/cores/arm` directory. So, to extend an existing CPU, create a
+new file in that directory, e.g.
+`configs/common/cores/arm/O3_ARM_v7a_3_DVFS.py`. If you're good/want to put the
+source code up anywhere ever, you should include the disclaimer and copyright
+notice from the orginal file that you're extending. In your new file, do
+`from __futures__ import absolute_import` and `from m5.objects import *` (don't
+know if that one is actually required, but better safe than sorry). Then,
+import the file you want to extend `from common.cores.arm import <filename>`
+(yes, you have to include the `common.cores.arm` even though you're in the
+directory, otherwise it can't find the file). Now go ahead and create your
+python sub-class like you normally would.
+
+**Note:** If you want to use custom variable names, the variables cannot be
+defined in the class. You'll need to just define them in the script and then
+use them in your class by assigning them to the "appropriate" class attribute
+names.
+
 ## Running
 ### Setup
 ```bash
