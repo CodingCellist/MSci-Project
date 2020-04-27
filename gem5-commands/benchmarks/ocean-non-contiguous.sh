@@ -18,6 +18,8 @@ cd ${GEM5_ROOT}
 ./build/ARM/gem5.opt \
     --outdir=${GEM5_OUTDIR}/ocean/non_contiguous_partitions/${N_BIG}b${N_LITTLE}L/m5out-p${N_THREADS}-${KERN_GOV} \
     --dot-dvfs-config=dvfs-config.dot \
+    --redirect-stdout \
+    --redirect-stderr \
     configs/example/arm/fs_bL_extended.py \
     --caches \
     --pmus \
