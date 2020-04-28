@@ -31,5 +31,6 @@ cd ${GEM5_ROOT}
     --bootloader=${M5_PATH}/binaries/boot.arm64 \
     --bootscript=../gem5-bootscripts/benchmarks/ocean/non_contiguous_partitions/p${N_THREADS}-n258.rcS \
     --cpu-type=dvfs-timing \
+    --stat-freq=1E-3 \
     --restore-from=${CPT}
 
