@@ -1,3 +1,9 @@
 [submodule "gem5"]
 	path = gem5
 	url = git@gitlab.cs.st-andrews.ac.uk:teh6/gem5.git
+[submodule "gemstone-applypower"]
+	path = gemstone-applypower
+	url = git@github.com:mattw200/gemstone-applypower.git
+[submodule "Splash-3"]
+	path = Splash-3
+	url = git@github.com:SakalisC/Splash-3.git
