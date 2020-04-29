@@ -1,18 +1,90 @@
+\section{Processes and Threads}
+The scheduling problem has been around for a while. The earliest papers which
+discuss scheduling date back to 1962 \cite{corbato_experimental_1962}, with
+hard real-time scheduling (i.e. scheduling for systems where time limits
+\textit{must} be met) dating back to 1973 \cite{liu_scheduling_1973}, and
+preemptive scheduling being discussed in 1975 \cite{kleinrock_computer_1976}. In
+this section I will give an overview of the scheduling problem, explaining some
+key concepts and problems, basing a lot on Silberschatz et al.'s book on
+operating systems \cite{silberschatz_operating_2014}.
+
+Code running is represented as a \textit{process}. Processes contain the code
+being run, information such as what process started the current process (its
+\textit{parent}), what process(es) the current process has created (its
+\textit{children}), the state of the process (e.g. `running', `waiting',
+`ready'), and also some information about the current memory and scheduling
+information about the process's priority, how long it has been running for, etc.
+A process may contain multiple \textit{threads}. A thread is a simple unit of
+computation or work being done. A thread has an ID and contains a stack, a
+register set, and a program counter. The other parts, e.g. the code or memory
+information, is stored in the process running the thread and is shared between
+all the process's threads. Hence, creating new threads and inter-thread
+communication is cheaper than creating new processes and inter-process
+communication. This is useful for processes which want to do different, often
+independent things in parallel, e.g. a web browser fetching data from the
+internet whilst also handling the user's keystrokes. It can also be useful if
+the problem being solved can be broken up into smaller parts which can then be
+done in parallel.
+
+In most major operating systems, MacOS, Windows, Solaris, and Linux, there are
+both user threads and kernel threads. Kernel threads, as the name implies, are
+managed directly by the operating system kernel. User threads, on the other
+hand, are created and managed by the user/programmer. Kernel threads are more
+expensive to create than user threads and as such, most operating systems map
+user threads to kernel threads during runtime. This means that the
+user/programmer does not have to worry about how many threads they create, and
+that the operating system can reuse kernel threads for various applications,
+thereby improving performance. When it comes to scheduling, the scheduler
+manages kernel threads.
+
 \section{Scheduling}
+When talking about scheduling, the terms ``process scheduling'' and ``thread
+scheduling'' are often used interchangeably. To avoid confusion with the
+previous section and to be consistent with commonly used Linux terminology, I
+shall use ``task'' to refer to anything, be it a process or a thread, which
+needs to be scheduled. Scheduling is the problem determining what tasks need to
+run and for how long. Most tasks do not require constant computation. Instead,
+computation happens in bursts and the other time is, for example, spent on
+waiting for I/O to happen, e.g. reading a value from memory. So in order to
+maximise CPU usage, a scheduler swaps different tasks on the CPU(s). Another
+reason scheduling is required, is that if the scheduler did not swap the tasks,
+a single CPU-intensive task could hog the CPU for a long time. On interactive
+systems, this could result in loss of interactivity (aka. ``freezing'') until
+the heavy task finishes its computations. By swapping tasks, the scheduler tries
+to keep the CPU-usage as fair as possible. Ideally, the perfect scheduler would
+let the task that has the least time left run first, thereby minimising the wait
+time for the other tasks. However, this would require the scheduler to know the
+future (i.e. when the various tasks would stop) and is therefore unfortunately
+impossible. Instead, there exist various scheduling algorithms which are used to
+determine what task to run next. One way to determine this is to assign the
+tasks a priority and execute the highest-priority task first. This works fine if
+the high-priority jobs finish. However, there is a very real risk that a
+low-priority job may never be run as it is kept at the back of the queue by
+higher-priority jobs. As such, priority scheduling is rarely used in its
+na{\" i}ve version, with modern scheduling algorithms changing the priority of a
+task over time, based on various variables. One example of this is the Linux
+``Completely Fair Scheduler'' (CFS) which was introduced in version 2.6.23
+\cite{noauthor_cfs_nodate}.
+
+    \subsection{The Completely Fair Scheduler}
+    Typically, the tasks that are waiting to be executed on the CPU are stored
+    in a so-called ``ready queue''. However, the CFS stores the tasks in a
+    data structure known as a Red-Black tree (RB-tree). RB-trees were first
+    introduced in 1978 by Guibas and Sedgewick \cite{guibas_dichromatic_1978}.
+    An RB-tree is a type of self-balancing binary tree \todo{explain RB-trees}
+
+The problem of how to schedule the various
+jobs running on a computer is complex, and has only gotten more complex as
+multicore processors (i.e. chips with multiple CPU cores on them) became
+commonplace. With the introduction of simultaneous multithreading, the ability
+to run more than one thread per CPU core, the problem has gotten further
+complex. \todo{mention asymmetric single-ISA}
+
+
 \begin{itemize}
-    \item scheduling has been around for a while
-    \item mention that a lot will be from Silberschatz book
-    \item explain basic problem
-    \begin{itemize}
-        \item what is a task?
-        \item what is a process?
-        \item what is a hw thread?
-        \item what is a sw thread and why do we need them?
-    \end{itemize}
     \item explain perfect way (shortest job first) and why it doesn't work
     \item mention that the problem has gotten more complex as we now have
           multicore processors and simultaneous multithreading (explain these)
-    \item 
     \item explain priority scheduling and its problems
     \item explain CFS
 \end{itemize}
