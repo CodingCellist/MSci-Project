@@ -71,7 +71,47 @@ task over time, based on various variables. One example of this is the Linux
     in a so-called ``ready queue''. However, the CFS stores the tasks in a
     data structure known as a Red-Black tree (RB-tree). RB-trees were first
     introduced in 1978 by Guibas and Sedgewick \cite{guibas_dichromatic_1978}.
-    An RB-tree is a type of self-balancing binary tree \todo{explain RB-trees}
+    An RB-tree is a type of self-balancing binary tree. In addition to having
+    the usual binary tree attributes (a key, the left children being less than
+    their parent, and the right children being greater than their parent), each
+    node in the tree is given a colour, red or black, and the tree balances
+    itself by maintaining the following three properties:
+    \begin{enumerate}
+        \item The root of an RB-tree is black.
+        \item The children of a red node are black.
+        \item The paths going from the root to a \texttt{null} leaf all contain
+              the same number of black nodes.
+    \end{enumerate}
+    A complete overview of how the operations on RB-trees work is beyond the
+    scope of this dissertation. The important attribute is that, like other
+    self-balancing trees, an RB-tree maintains a height that is very close to
+    (or exactly) $log N$, regardless of how many operations have been performed,
+    allowing lookup to stay $O(log N)$. By keeping the tasks in an RB-tree, the
+    CFS can access them quickly while the data structure makes sure to permute
+    the tasks according to their priority. To further increase performance, the
+    CFS caches a pointer to the leftmost node in RB-tree.
+    \\
+    
+    The CFS distinguishes between real-time tasks and `normal' tasks. Real-time
+    tasks have a regular priority and are scheduled accordingly. Normal tasks
+    each have a virtual runtime (\texttt{vruntime}) and a ``nice value''. The
+    \texttt{vruntime} is used as the key for the RB-tree storing the tasks and
+    the CFS schedules the leftmost leaf in the RB-tree. The nice value is an
+    integer between $-20$ and $+19$ which affects the recorded \texttt{vruntime}
+    for that task. A task's \texttt{vruntime} is equal to its actual/physical
+    runtime (the time it spent on the CPU) and some modifier based on the task's
+    nice value. A negative nice value leads to a lower \texttt{vruntime} than
+    actual runtime, a nice value of 0 to an equal value, and a positive nice
+    value to a greater \texttt{vruntime} than the actual runtime. This means
+    that a task can ``be nice'' to other tasks by setting its nice value higher,
+    resulting in a bigger \texttt{vruntime}, leading it to be scheduled less
+    often than other tasks. And conversely, tasks with a low nice value will be
+    scheduled more often despite them potentially taking up more physical
+    runtime. All tasks eventually get to run, as a task's \texttt{vruntime} can
+    only increase, meaning that even if it does so slowly (due to a low nice
+    value) it will eventually be greater than a task whose \texttt{vruntime} has
+    not changed because it was not being scheduled. This task will then be the
+    leftmost node, and so it will get scheduled.
 
 The problem of how to schedule the various
 jobs running on a computer is complex, and has only gotten more complex as
@@ -82,11 +122,8 @@ complex. \todo{mention asymmetric single-ISA}
 
 
 \begin{itemize}
-    \item explain perfect way (shortest job first) and why it doesn't work
     \item mention that the problem has gotten more complex as we now have
           multicore processors and simultaneous multithreading (explain these)
-    \item explain priority scheduling and its problems
-    \item explain CFS
 \end{itemize}
 
 \section{ARM big.LITTLE architecture}
