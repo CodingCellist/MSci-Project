@@ -41,9 +41,9 @@ manages kernel threads.
 When talking about scheduling, the terms ``process scheduling'' and ``thread
 scheduling'' are often used interchangeably. To avoid confusion with the
 previous section and to be consistent with commonly used Linux terminology, I
-shall use ``task'' to refer to anything, be it a process or a thread, which
-needs to be scheduled. Scheduling is the problem determining what tasks need to
-run and for how long. Most tasks do not require constant computation. Instead,
+will use ``task'' to refer to anything, be it a process or a thread, which needs
+to be scheduled. Scheduling is the problem determining what tasks need to run
+and for how long. Most tasks do not require constant computation. Instead,
 computation happens in bursts and the other time is, for example, spent on
 waiting for I/O to happen, e.g. reading a value from memory. So in order to
 maximise CPU usage, a scheduler swaps different tasks on the CPU(s). Another
@@ -51,19 +51,26 @@ reason scheduling is required, is that if the scheduler did not swap the tasks,
 a single CPU-intensive task could hog the CPU for a long time. On interactive
 systems, this could result in loss of interactivity (aka. ``freezing'') until
 the heavy task finishes its computations. By swapping tasks, the scheduler tries
-to keep the CPU-usage as fair as possible. Ideally, the perfect scheduler would
-let the task that has the least time left run first, thereby minimising the wait
-time for the other tasks. However, this would require the scheduler to know the
-future (i.e. when the various tasks would stop) and is therefore unfortunately
-impossible. Instead, there exist various scheduling algorithms which are used to
-determine what task to run next. One way to determine this is to assign the
-tasks a priority and execute the highest-priority task first. This works fine if
-the high-priority jobs finish. However, there is a very real risk that a
-low-priority job may never be run as it is kept at the back of the queue by
-higher-priority jobs. As such, priority scheduling is rarely used in its
-na{\" i}ve version, with modern scheduling algorithms changing the priority of a
-task over time, based on various variables. One example of this is the Linux
-``Completely Fair Scheduler'' (CFS) which was introduced in version 2.6.23
+to keep the CPU-usage as fair as possible. This swap can be done when a task
+signals that it is waiting, or when it finishes. This is known as
+\textit{non-preemptive} scheduling. By contrast, \textit{preemptive} scheduling
+is when the scheduler may pause a task mid-execution in order for a different
+task to have some time on the CPU as well, thereby ensuring that no one task
+hogs the CPU leading to the other tasks being unresponsive.
+
+Ideally, the perfect scheduler would let the task that has the least time left
+run first, thereby minimising the wait time for the other tasks. However, this
+would require the scheduler to know the future (i.e. when the various tasks
+would stop) and is therefore unfortunately impossible. Instead, there exist
+various scheduling algorithms which are used to determine what task to run next.
+One way to determine this is to assign the tasks a priority and execute the
+highest-priority task first. This works fine if the high-priority jobs finish.
+However, there is a very real risk that a low-priority job may never be run as
+it is kept at the back of the queue by higher-priority jobs. As such, priority
+scheduling is rarely used in its na{\" i}ve version, with modern scheduling
+algorithms changing the priority of a task over time, based on various
+variables. One example of this is the Linux ``Completely Fair Scheduler'' (CFS)
+which was introduced in kernel 2.6.23
 \cite{noauthor_cfs_nodate}.
 
     \subsection{The Completely Fair Scheduler}
@@ -112,13 +119,14 @@ task over time, based on various variables. One example of this is the Linux
     value) it will eventually be greater than a task whose \texttt{vruntime} has
     not changed because it was not being scheduled. This task will then be the
     leftmost node, and so it will get scheduled.
-
-The problem of how to schedule the various
-jobs running on a computer is complex, and has only gotten more complex as
-multicore processors (i.e. chips with multiple CPU cores on them) became
-commonplace. With the introduction of simultaneous multithreading, the ability
-to run more than one thread per CPU core, the problem has gotten further
-complex. \todo{mention asymmetric single-ISA}
+    
+    \subsection{Multicore Scheduling}
+    The problem of how to schedule the various
+    jobs running on a computer is complex, and has only gotten more complex as
+    multicore processors (i.e. chips with multiple CPU cores on them) became
+    commonplace. With the introduction of simultaneous multithreading, the
+    ability to run more than one thread per CPU core, the problem has gotten
+    further complex.
 
 
 \begin{itemize}
