@@ -121,18 +121,37 @@ which was introduced in kernel 2.6.23
     leftmost node, and so it will get scheduled.
     
     \subsection{Multicore Scheduling}
-    The problem of how to schedule the various
-    jobs running on a computer is complex, and has only gotten more complex as
-    multicore processors (i.e. chips with multiple CPU cores on them) became
-    commonplace. With the introduction of simultaneous multithreading, the
-    ability to run more than one thread per CPU core, the problem has gotten
-    further complex.
-
-
-\begin{itemize}
-    \item mention that the problem has gotten more complex as we now have
-          multicore processors and simultaneous multithreading (explain these)
-\end{itemize}
+    Most modern CPUs have multiple processing elements, or cores, on the
+    physical chip. These chips are referred to as multicore processors. Each
+    core on the chip has its own set of registers and level 1 (L1) cache, with
+    the other memory components typically being shared across all the processing
+    cores. Having multiple cores can help in terms of \textit{load balancing},
+    i.e. tasks can be spread across the different cores in order to give them as
+    much runtime as possible without one single core having to run all the
+    tasks. However, tasks cannot easily be resumed on any processor.
+    When swapping a task back in, the scheduler must make sure that the
+    processor and memory state is the same as when the task was swapped out.
+    Since each core has its own set of registers and cache, this means that it
+    is simpler to restore a task to the core it previously ran on, compared to
+    transferring all the task's information to a different core, invalidating
+    the information on the old core, and then restoring the layout on the other
+    core. This is what is known as processor \textit{affinity}; the task has an
+    \textit{affinity} for running on the same core it was swapped out from.
+    Because it is impossible to know how quickly a task will finish, it is
+    possible that some cores will run out of tasks before other ones. In this
+    case, it is necessary to do \textit{load balancing}. This typically involves
+    migrating a task from one core to another. There are two ways a task can be
+    migrated: \textit{push migration} and \textit{pull migration}. Pull
+    migration is when an `empty' core transfers a ready task from a busy core to
+    itself, `pulling' the task to it. Push migration, on the other hand, is when
+    an external process notices that it may be better to migrate a task to a
+    different core and `pushes' that task from its original core to the new
+    core. Since these two migration techniques are not mutually exclusive, the
+    CFS implements both. As previously discussed, migrating a task disturbs its
+    affinity and incurs a lot of overhead. There is no perfect way of
+    prioritising one over the other and schedulers have to strike a balance when
+    managing the tasks of multicore chips, further complicating the already
+    complex scheduling problem.
 
 \section{ARM big.LITTLE architecture}
 \begin{itemize}
