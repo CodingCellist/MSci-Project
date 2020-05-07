@@ -154,12 +154,55 @@ which was introduced in kernel 2.6.23
     complex scheduling problem.
 
 \section{ARM big.LITTLE architecture}
-\begin{itemize}
-    \item what is an ISA?
-    \item what is single-ISA means and why it is helpful?
-    \item mention that ARM big.LITTLE is an example of this
-    \item what is a big core and what is a LITTLE core?
-    \item why do we have this split?
-    \item mention that this poses new challenges to the already complex problem
-          that scheduling is
-\end{itemize}
+When running code on CPUs, the code is written, compiled to assembler, and then
+assembled into an executable binary. How the machine code that the CPU runs
+behaves is defined by its Instruction Set Architecture (ISA). An ISA defines the
+registers available; what operations are available, how many arguments they
+take, and how they behave; how memory is addressed and many other things. When
+implementing an ISA, for example when designing a CPU, the physical circuitry
+representing different parts of the ISA may be drastically different between
+various implementations, but the operations and results are the same (e.g. an
+\texttt{ADD} instruction from an ISA implemented on two different CPUs should
+behave the same regardless of how the internals of the CPU look).
+
+Having different CPUs implement the same ISA is extremely useful as it allows
+for binary compatibility as long as the code is compiled for the ISA being used.
+A classic example of this is the x86 ISA which most modern desktop and laptop
+processors implement. The same software that runs on a desktop CPU can be run on
+a laptop CPU without needing to recompile it. The ARM big.LITTLE architecture
+takes this concept one step further by introducing asymmetric single-ISA
+multiprocessors (ASMs): A chip which contains multiple, different CPUs
+implementing the same ISA. The name ``big.LITTLE'' refers to the two CPU/core
+types, `big' and `LITTLE'. The big cores are more powerful but consume more
+power, whereas the LITTLE cores are less powerful but also consume less power.
+This benefits systems where power is limited, e.g. mobile phones, as the LITTLE
+cores can be used for tasks that are not performance-critical, with the big
+cores only being used when necessary, thereby saving power. Additionally, since
+the CPUs are located on the same chip, they have access to the same memory and
+so tasks can be migrated between cores to save power or (hopefully) increase
+performance. However, as with the introduction of multicore, the introduction of
+ASM systems adds a layer of complexity to scheduling: What tasks should run on
+big cores vs. LITTLE cores? When should tasks be migrated from one to the other?
+When a new task arrives, how do we know what type of core to start it on (in
+order to minimise migration overhead)?
+
+    \subsection{Performance Monitoring Units}
+    Some of the more recent ARM ISAs, e.g. ARMv7 and ARMv8, specify Performance
+    Monitoring Units (PMUs). These are special registers and events which allow
+    the hardware to monitor and report certain statistics which can then be
+    examined, either using an external tool or inline assembler. The PMUs can
+    monitor events like the number of CPU cycles passed, the number of level 2
+    (L2) cache accesses, the number of memory access, how many times the branch
+    predictor speculatively executed a branch, and more. The PMUs have to be
+    enabled by the kernel by setting certain bits in a special register (bit 0
+    of \texttt{PMCR\_EL0} in the case of ARMv8) to 1 (\texttt{True}). After
+    this, special ``event numbers'' can be written to other special registers in
+    order to specify what events to count. The cores used in this project (i.e.
+    Cortex A73 cores for big and Cortex A53 cores for LITTLE) support the cycle
+    counter and 6 additional PMU events
+    \cite{noauthor_arm_2015,noauthor_arm_2016}. Since PMUs can be accessed
+    programmatically using inline assembler, it should theoretically be possible
+    to use these to make informed scheduling decisions. At the cost of yet
+    another thing to consider when scheduling.
+
+\section{Dynamic Voltage Frequency Scaling}
