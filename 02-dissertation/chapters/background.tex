@@ -205,4 +205,34 @@ order to minimise migration overhead)?
     to use these to make informed scheduling decisions. At the cost of yet
     another thing to consider when scheduling.
 
-\section{Dynamic Voltage Frequency Scaling}
+\section{Dynamic Voltage and Frequency Scaling}
+CPUs used to run at a fixed frequency. As processor design and manufacturing
+improved, it became possible to change a CPU's frequency dynamically, either
+through the BIOS or the Operating System (OS). With dynamic frequency scaling,
+the CPU could be throttled down when idle, thereby saving power, and throttled
+back up (or sometimes even automatically overclocked) when performance was
+required. Running a CPU at higher frequencies requires higher voltages in order
+for the gates in the CPU to stabilise fast enough. If they do not stabilise
+before the next frequency tick/clock pulse, the hardware output of that CPU gate
+will be unreliable and/or incorrect. Dynamic Voltage and Frequency Scaling
+(DVFS) is a technique which saves power by, as the name suggests, varying the
+frequency and voltage on the fly. It was introduced as an energy savings measure
+in 1990 \cite{macken_voltage_1990} and is in every modern computer system. The
+Linux kernel supports DVFS through its \texttt{cpufreq} interface and the
+``frequency governors'' which decide how to change the frequencies
+\cite{wysocki_cpu_nodate}. DVFS is also supported on ARM CPUs, including
+big.LITTLE setups, potentially allowing for even greater power savings than the
+big.LITTLE setup on its own. However, as with all the previously discussed
+topics, DVFS adds complexity to the scheduling problem.
+\\
+
+To sum up, in order to have both good performance and power efficient, a
+scheduler could take into account:
+\begin{itemize}
+    \item What type of core the task(s) run on (big or LITTLE),
+    \item whether it is worth migrating a task between cores \textit{and}
+          between core types,
+    \item and whether it is worth running the cores at full speed and voltage
+          or if some cores could be throttled to save power at a slight
+          performance hit.
+\end{itemize}
