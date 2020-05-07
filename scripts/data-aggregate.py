@@ -35,24 +35,50 @@ def parse_stats_file(csv_writer, stats_dict: dict,
     bc_stats = {}
     lc_stats = {}
     # BEGIN SIM STATS
+    # general stuff
     sim_seconds = -1
     cluster = 'None'
     bc_cpu = -1
     lc_cpu = -1
+    # pmu stats
+    branch_preds = -1
+    commited_insts = -1
     branch_mispreds = -1
     cycles = -1
-    commited_insts = -1
+    l1i_access = -1
+    l1d_access = -1
+    l1d_wb = -1
+    l2_access = -1
+    l2_wb = -1
+    # performance
     dynamic_power = -1
     static_power = -1
     # END SIM STATS
     with file.open() as stats_file:
         line = stats_file.readline()
         if line == "---------- End Simulation Statistics   ----------":
-            # FixMe: probably don't want to writerow here
-            csv_writer.writerow(stats)
+            # FixMe: accumulate all stats and write at end of simulation stats
+            #        as the stats are interspersed -_-
+            # FixMe: account for -1 stats meaning stats were uninitiated
+            # FIXME: csv_writer.writerow(stats)
             stats = [] + base_stats
             stat_block += 1
-        # TODO: figure out what stats to extract
+            # RESET
+            sim_seconds = -1
+            cluster = 'None'
+            bc_cpu = -1
+            lc_cpu = -1
+            branch_preds = -1
+            commited_insts = -1
+            branch_mispreds = -1
+            cycles = -1
+            l1i_access = -1
+            l1d_access = -1
+            l1d_wb = -1
+            l2_access = -1
+            l2_wb = -1
+            dynamic_power = -1
+            static_power = -1
         # sim_seconds is always 1 ms. It doesn't accumulate but resets for each
         # stats dump (which were done once per ms)
         elif 'sim_seconds' in line:
@@ -68,15 +94,18 @@ def parse_stats_file(csv_writer, stats_dict: dict,
                 line_list = [w for w in line.split(' ') if w != '']
                 cpu_no = [w for w in line_list[0].split('.') if 'cpus' in w]
                 bc_cpu = int(cpu_no[0][-1])
-            if 'branchMispredicts' in line:                 # PMU-event 0x10
+            if 'BTBLookups' in line:                        # PMU-event 0x12
+                line_list = [w for w in line.split(' ') if w != '']
+                branch_preds = int(line_list[1])
+            elif 'commit.committedInsts' in line:           # PMU-event 0x08
+                line_list = [w for w in line.split(' ') if w != '']
+                commited_insts = int(line_list[1])
+            elif 'iew.branchMispredicts' in line:           # PMU-event 0x10
                 line_list = [w for w in line.split(' ') if w != '']
                 branch_mispreds = int(line_list[1])
             elif 'numCycles' in line:       # cycle counter # PMU-event 0x11
                 line_list = [w for w in line.split(' ') if w != '']
                 cycles = int(line_list[1])
-            elif 'commit.committedInsts' in line:           # PMU-event 0x08
-                line_list = [w for w in line.split(' ') if w != '']
-                commited_insts = int(line_list[1])
             elif 'power_model.dynamic_power' in line:
                 # ~~what is pm0? pm1-3 never have power?...~~
                 # They are probably the various states, with p_m.dyn_p being the
@@ -89,15 +118,19 @@ def parse_stats_file(csv_writer, stats_dict: dict,
                 static_power = float(line_list[1])
             elif 'icache.overall_accesses::total' in line:  # PMU-event 0x14
                 line_list = [w for w in line.split(' ') if w != '']
-                pass
+                l1i_access = int(line_list[1])
             elif 'dcache.overall_accesses::total' in line:  # PMU-event 0x04
                 line_list = [w for w in line.split(' ') if w != '']
-                pass
+                l1d_access = int(line_list[1])
             elif 'dcache.writebacks::total' in line:        # PMU-event 0x15
                 line_list = [w for w in line.split(' ') if w != '']
-                pass
+                l1d_wb = int(line_list[1])
             elif 'l2.overall_accesses::total' in line:      # PMU-event 0x16
                 line_list = [w for w in line.split(' ') if w != '']
+                l2_access = int(line_list[1])
+            elif 'l2.writebacks::total' in line:            # PMU-event 0x18
+                line_list = [w for w in line.split(' ') if w != '']
+                l2_wb = int(line_list[1])
 
             # iew = issue/execute/writeback
             # TODO: writerow
