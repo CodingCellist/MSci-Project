@@ -162,7 +162,8 @@ def parse_stats_file(csv_writer, stats_dict: dict,
             # cluster = 'bigCluster'
             if 'cpus' in line and bc_cpu == -1 and '1b' in config:
                 bc_cpu = 0
-            elif 'cpus' + str(bc_cpu) not in line and 'cpus' in line:
+            elif 'cpus' + str(bc_cpu) not in line and 'cpus' in line\
+                    and '1b' not in config:
                 line_list = [w for w in line.split(' ') if w != '']
                 cpu_no = [w for w in line_list[0].split('.') if 'cpus' in w]
                 bc_cpu = int(cpu_no[0][-1])
@@ -219,7 +220,8 @@ def parse_stats_file(csv_writer, stats_dict: dict,
             # cluster = 'littleCluster'
             if 'cpus' in line and lc_cpu == -1 and '1L' in config:
                 lc_cpu = 0
-            elif 'cpus' + str(lc_cpu) not in line and 'cpus' in line:
+            elif 'cpus' + str(lc_cpu) not in line and 'cpus' in line\
+                    and '1L' not in config:
                 line_list = [w for w in line.split(' ') if w != '']
                 cpu_no = [w for w in line_list[0].split('.') if 'cpus' in w]
                 lc_cpu = int(cpu_no[0][-1])
