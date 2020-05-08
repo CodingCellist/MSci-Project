@@ -121,7 +121,7 @@ def handle_stats_line(stats_line: str, stats_dict: dict, cpu: int):
 
 
 def parse_stats_file(csv_writer, stats_dict: dict,
-                     benchmark: str, config: str, n_threads: str,
+                     benchmark: str, config: str, n_threads: int,
                      file: Path):
     big_cpus, little_cpus = int(config[0]), int(config[2])      # config: XbXL
     stat_block = 0
@@ -276,7 +276,7 @@ def parse(roi_dir: str, filename):
         for benchmark_dir in p.iterdir():
             benchmark_str = benchmark_dir.name
             subdirs = [d for d in benchmark_dir.iterdir() if d.is_dir()]
-            if len(subdirs) == 1:
+            if len(subdirs) == 2:
                 # possibly another sub-dir for some benchmarks
                 benchmark_str += '-' + subdirs[0].name
                 bm_dir = subdirs[0]
@@ -295,6 +295,7 @@ def parse(roi_dir: str, filename):
                         # each #threads dir contains the actual stats
                         if file.name != "stats.txt":
                             continue
+                        print('On file', file)
                         parse_stats_file(csv_writer, stats_dict,
                                          benchmark_str, config_str, n_threads,
                                          file)
