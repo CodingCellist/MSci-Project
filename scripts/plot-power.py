@@ -19,8 +19,7 @@ def get_args():
     parser.add_argument('--output-dir', type=str, default='plots',
                         help='Top-level directory to save the plots in.')
     parser.add_argument('--share-x', action='store_true',
-                        help="Don't share the x-axis across subplots."
-                             " DEFAULT FALSE")
+                        help="Share the x-axis across subplots. DEFAULT FALSE")
     parser.add_argument('--no-share-y', action='store_true',
                         help="Don't share the y axis between subplots."
                              " DEFAULT FALSE")
