@@ -10,9 +10,12 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('csv_file', type=str, default='roi-out.csv',
                         help='CSV file with the power data.')
-    parser.add_argument('--figsize', type=tuple, default=(10.8, 19.2),
-                        help='The size, in 100 pixels(?), of the figures.'
-                             ' DEFAULT (10.8, 19.2), i.e. 1080x1920')
+    parser.add_argument('--figsize', type=tuple, default=(10.8, 4.8),
+                        help='The size, in inches apparently, of the rows.'
+                             ' NOTE: The height scales with the number of rows,'
+                             ' i.e. a 4 height results in a 16 height if there'
+                             ' are 4 rows.'
+                             ' DEFAULT (10.8, 4.8), i.e. 1080x480 to 1080x1920')
     parser.add_argument('--output-dir', type=str, default='plots',
                         help='Top-level directory to save the plots in.')
     parser.add_argument('--share-x', action='store_true',
@@ -96,11 +99,13 @@ def plot(csv_file: str, outdir: pathlib.Path = pathlib.Path('./plots/'),
 def _plot_joint(outdest, unstacked,
                 figsize, sharex, sharey, suptitle,
                 power_type, bc_range, lc_range):
-    ncols = 2
     total_cpus = len(bc_range) + len(lc_range)
-    fig, axes = plt.subplots(nrows=round(total_cpus / 2),
+    nrows = round(total_cpus / 2)
+    ncols = 2
+    fs = (figsize[0], round(figsize[1] * nrows, 1))
+    fig, axes = plt.subplots(nrows=nrows,
                              ncols=ncols,
-                             figsize=figsize,
+                             figsize=fs,
                              sharex=sharex,
                              sharey=sharey,
                              constrained_layout=True
