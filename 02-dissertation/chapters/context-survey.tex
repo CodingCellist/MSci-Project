@@ -1,0 +1,73 @@
+It is only fairly recently that people have started looking at the problem of
+Energy Aware Scheduling (EAS) and optimising for big.LITTLE  In 2016 the CFS
+received several fixes based on a paper published in the same year, detailing
+how some bugs in the CFS decreased performance on multicore systems by 13-24\%
+\cite{lozi_linux_2016}. This paper addresses multicore in general, and does not
+focus on big.LITTLE or energy. However, it did drastically improve the
+performance of the CFS on multicore systems. As mentioned in Jibaja et al.
+\cite{jibaja_portable_2016}, the CFS does well on big.LITTLE for scalable
+workloads, but it may be possible to accelerate other, non-scalable workloads as
+well.
+
+Jibaja et al. describe the ``WASH'' scheduler \cite{jibaja_portable_2016}. The
+WASH scheduling algorithm is an attempt at optimising big.LITTLE setups on the
+fly rather than through external hints or guidance from the programmer. By
+analysing the performance of various tasks depending on the percentage of cycles
+spent waiting on locks, WASH estimates the criticality, sensitivity, and
+progress of the tasks currently active on the system. Since the number of
+instructions executed varies between big and LITTLE cores (due to their
+different computational power), WASH scales with respect to the instructions per
+clock (IPC) so as to have a more fair view of a task's performance. Based on all
+this information, WASH wash then `accelerates' tasks by either assigning them to
+a big core from the beginning, or migrating them to a big core if not enough
+progress is being made according to the parameters monitored. This is done
+through the POSIX-thread (pthread) API, specifically the
+\texttt{pthread\_setaffinity\_np} function which sets the affinity of the
+pthread to the CPU(s) given. Whilst this is a straightforward way to migrate
+threads, it also means the actual migration is controlled by the CFS rather
+than WASH itself \cite{yu_colab_2020}. WASH's main focus is to make the
+scheduler big.LITTLE aware and thereby hopefully improve power usage, and as
+such it does not focus on power or energy along with big.LITTLE, meaning there
+is likely to be room for improvement. Finally, it turns out that WASH's
+decision-making does not always accelerate the program as a whole, despite
+running certain tasks on big cores due to some of the threads on big cores
+actually waiting on results or feedback from threads being run on LITTLE cores
+\cite{yu_colab_2020}.
+
+The paper describing the COLAB scheduler, published by Yu et al. earlier this
+year \cite{yu_colab_2020}, highlights a number of shortcomings regarding the
+WASH scheduler and proposes a different, collaborative scheduling algorithm. The
+COLAB scheduler addresses \textit{thread criticality} (some threads being more
+critical with respect to program performance than others) and
+\textit{core sensitivity} (the big and LITTLE cores being designed for different
+types of workload) whilst maintaining fairness. The collaborative part of COLAB
+comes from allowing both the core allocator (deciding which core to start on)
+and the thread selector to label the threads in terms of whether they have a
+good chance of a high speedup from a big core and whether they are highly
+blocking or not. The speedup label can then be used to allocate the best type of
+core for the thread, and a more blocking thread can be selected more often so as
+to hopefully move it, and by extension threads waiting on it, along faster. This
+collaboration between core allocation and thread selection allows COLAB to
+achieve performance gains of 5-15\% on average compared to WASH, depending on
+the hardware configuration. However, similar to WASH, COLAB does not address
+power or energy, but focuses on improving big.LITTLE. Therefore, this space is
+still mostly unexplored and it is possible power savings could be made without
+sacrificing much performance.
+
+\begin{itemize}
+    \item it is only recently that people have tried to make the scheduler/OS
+          aware of big.LITTLE (WASH+COLAB)
+    \item it is only very recently that people have tried to make the
+          scheduler/OS aware of energy (Basireddy/Reddy + linux kernel/ARM)
+    \begin{itemize}
+        \item AdaMD uses PMUs
+        \item focuses on energy
+        \item uses ``performance constraints'' but seems vague in terms of where
+              these came from
+        \item published before COLAB, so not collaborative, so could possibly be
+              improved in terms of application throughput and responsiveness
+    \end{itemize}
+    \item something about why this dissertation is still relevant...
+    \item \^ nothing seems to combine power saving with thread-level AMP-aware
+          scheduling, e.g. COLAB
+\end{itemize}
