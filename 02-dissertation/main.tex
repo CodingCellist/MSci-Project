@@ -5,6 +5,9 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{listings}
+\usepackage[british]{babel}
+\usepackage[hyperref]{xcolor}
+\usepackage{pdfpages}
 
 \usepackage{todonotes}
 
@@ -16,18 +19,52 @@
 % interactive pdf
 \usepackage{hyperref}
 \usepackage{url}
-\hypersetup{colorlinks=true, citecolor=black}
+\hypersetup{colorlinks=true, citecolor=black, linkcolor=blue}
 
 
 \begin{document}
-    \section*{Declaration}
+    \input{titlepage}
+    
+    \pagenumbering{roman}
+    
+    \chapter*{Declaration}
     \input{declaration}
     
+    \chapter*{Abstract}
+    \input{abstract}
+    
+    \tableofcontents
+    \pagenumbering{gobble}
+    
     \chapter{Background}
+    \pagenumbering{arabic}
     \input{chapters/background}
     
     \chapter{Context Survey}
     \input{chapters/context-survey}
     
+    \chapter{The gem5 simulator}
+    \input{chapters/the-gem5-simulator}
+    
+    \chapter{Experiments}
+    \input{chapters/experiments}
+    
+    \chapter{Problems Encountered}
+    \input{chapters/problems-encountered}
+    
+    \chapter{Results}
+    \input{chapters/results}
+    
+    \chapter{Conclusion}
+    \input{chapters/conclusion}
+    
+    \chapter*{Acknowledgements}
+    \input{acknowledgements}
+    
     \printbibliography
+    
+    \appendix
+    
+    \chapter{Ethics}
+    \includepdf{appendices/Preliminary-Ethics-form}
 \end{document}
