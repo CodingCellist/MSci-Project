@@ -54,20 +54,41 @@ power or energy, but focuses on improving big.LITTLE. Therefore, this space is
 still mostly unexplored and it is possible power savings could be made without
 sacrificing much performance.
 
-\begin{itemize}
-    \item it is only recently that people have tried to make the scheduler/OS
-          aware of big.LITTLE (WASH+COLAB)
-    \item it is only very recently that people have tried to make the
-          scheduler/OS aware of energy (Basireddy/Reddy + linux kernel/ARM)
-    \begin{itemize}
-        \item AdaMD uses PMUs
-        \item focuses on energy
-        \item uses ``performance constraints'' but seems vague in terms of where
-              these came from
-        \item published before COLAB, so not collaborative, so could possibly be
-              improved in terms of application throughput and responsiveness
-    \end{itemize}
-    \item something about why this dissertation is still relevant...
-    \item \^ nothing seems to combine power saving with thread-level AMP-aware
-          scheduling, e.g. COLAB
-\end{itemize}
+A recent Ph.D. thesis and collection of papers by K. Reddy Basireddy do tackle
+the DVFS side of things. The thesis seems address power and energy for both
+asymmetric and symmetric multicore processors, with DVFS being a subset of the
+methods examined \cite{basireddy_runtime_2019}. The DVFS part resulted in the
+AdaMD paper \cite{basireddy_adamd_2019} which details how by using certain PMUs
+with a ``performance monitor'', the DVFS settings can be adjusted to balance
+power and performance at runtime. AdaMD works by doing an initial prediction of
+what it thinks the best DVFS and core settings are, and then periodically
+monitoring the performance of the application and adjusting the DVFS settings
+and core allocation in terms of ``performance constraints''. However, the paper
+seems somewhat vague in terms of where these performance constraints come from
+and what they are defined in terms of, e.g. if they are the number of cycles or
+application runtime or something different. Additionally, as its main focus is
+DVFS and energy efficiency, and since the paper was published before the COLAB
+paper, it is possible that the performance of COLAB and the energy efficiency
+could be combined.
+
+ARM have also looked into EAS. With release 5.0 of the Linux kernel in March
+2019 \cite{torvalds_linux_2019} EAS was officially merged into the kernel and
+released \cite{noauthor_linux_2019}. However, as described in the official
+documentation \cite{noauthor_energy_nodate} this relies on the Energy Model
+framework being present in the kernel, rather than the PMUs, and also appears 
+to still be a work in progress. The Energy Model framework is likely to be more 
+expensive to use than the hardware-based PMUs, and it is possible that greater 
+performance monitoring accuracy could be achieved by using certain PMU events. 
+Finally, similar to AdaMD, EAS on Linux does not seem to account for the 
+improvements described in the COLAB paper and so it is possible that greater 
+performance and energy savings could be achieved.
+\\
+
+To summarise, making the scheduler aware of the different core types on
+Asymmetric Multicore Processors is something only recently started gaining
+attention in the literature. Making the scheduler energy aware is also only
+recently beginning to make its way into real systems, e.g. EAS in Linux 5.x.
+Across the existing literature, nothing seems to combine the two, resulting in a
+highly interesting and applicable research area, as big.LITTLE systems become
+increasingly ubiquitous in both mobile devices and the IoT, both of which are
+could benefit from power savings and/or better scheduling.
