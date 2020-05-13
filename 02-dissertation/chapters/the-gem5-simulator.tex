@@ -1,6 +1,55 @@
+\section{Overview}
+The gem5 Simulator \cite{binkert_gem5_2011} is a state-of-the-art hardware 
+simulator used not only for architecture research, but also by the companies 
+which develop the hardware it simulates. ARM, for example, have detailed their 
+use of it at the ARM research summit in 2017. It is the result of merging two 
+simulators in 2011: the m5 simulator, which had great support for multiple 
+hardware architectures and ISAs, and the GEMS simulator, whose main focus was 
+memory simulation and hence allowed for detailed memory models and various 
+cache coherence protocols \cite{binkert_gem5_2011}.
+
+Due to the enormous complexity of such a piece of software, the way to start 
+using gem5 is to download and build from source \cite{noauthor_gem5_nodate-2}. 
+Building the simulator can be a bit complicated, due to it being sensitive to 
+various system tools and configurations. The gem5 Simulator uses \texttt{scons} 
+as its build tool. Specifically, it seems to rely on the Python 2 version of 
+\texttt{scons} (and also uses Python 2 for its other Python scripts) despite 
+Python 2 having been officially deprecated on the 1\textsuperscript{st} of 
+January 2020, with the move to do so being announced well in advance 
+\cite{noauthor_sunsetting_nodate}. However, this can be easily fixed by using a 
+Python 2 virtual environment. The specific version of the GNU Compiler 
+Collection (GCC) also seems to affect things. I was using GCC version 9.3.0 
+which must have more warnings than the version used by the gem5 developers, as 
+it failed to build gem5 due to the \texttt{-Werror} flag being turned on. This 
+flags turns compiler warnings, which normally highlight suspicious areas of 
+code but still lets the build go ahead, into errors which do not let the build 
+go ahead. The user can tell the compiler that some warnings are exceptions to 
+the \texttt{-Werror} flag, but due to the number of warnings I was getting, it 
+was simpler to remove the flag from the \texttt{scons} configuration found in 
+the \texttt{SConstruct} file. There are also a number of packages that the 
+build script might recommend one installs, most notably the Google Performance 
+Tools (gperftools) \cite{noauthor_google_nodate} which they suggest improves 
+performance by 12\%. Once the necessary software, packages, etc. have been 
+installed and configured, the build process takes around 20-30 minutes when 
+building using 13 threads on an 8\textsuperscript{th} generation Intel Core i7 
+processor, which also says something about the scale and complexity of gem5.
+
+\section{Configuration and Setup}
+There are two parts of gem5 that can be configured: the simulator binary and 
+its configuration files. The binary produced by \texttt{scons} supports a 
+number of flags which allow the user to specify things like the output 
+directory, whether to redirect gem5's standard output and/or standard error 
+streams, and what to call various files being output. There are also a number 
+of debug flags for developing gem5 itself. The most important of the flags is 
+arguably the \texttt{--outdir} flag used for specifying the output directory. 
+Without specifying the output directory when running multiple simulations side 
+by side, if no directory is specified, i.e. the default \texttt{m5out} 
+directory is used, each instance will try to write to the same files as the 
+others, resulting in non-deterministic race conditions in terms of which 
+process was the last to write to the file, leading to unusable, interweaved 
+output.
+
 \begin{itemize}
-    \item explain what it is
-    \item mention getting it to build is a bit finicky
     \item explain how to configure it, both the gem5.opt binary itself and the
           python scripts
     \item explain the layouts of the various python scripts, the need to
