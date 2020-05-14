@@ -159,8 +159,8 @@ processor, which also says something about the scale and complexity of gem5.
     in by using the atomic CPU and calling the \texttt{m5 checkpoint} 
     instruction from within the bootscript, before the line(s) where the 
     bootscript starts the benchmark.
-    \begin{lstlisting}[language=Bash, caption=Example bootscript using 
-    checkpointing]
+    \begin{lstlisting}[language=bash, caption=Example bootscript using 
+    checkpointing, basicstyle=\sffamily\footnotesize]
     #!/bin/bash
     
     echo "bootscript.rcS is running"
@@ -172,15 +172,148 @@ processor, which also says something about the scale and complexity of gem5.
     echo "Workload done, exiting simulation."
     /sbin/m5 exit
     \end{lstlisting}
-    Once the bootscript has created the 
-    checkpoint, we can then interrupt the simulation and restart it with the 
-    timing CPU using the \texttt{--cpu-type} flag, and specify the path to the 
-    checkpoint to restore from using the \texttt{--resume-from} flag. 
-    Unfortunately, it seems that the bootscript is loaded into memory and hence 
-    stored along with the checkpoint, meaning separate bootscripts have to be 
-    created and fast-forwarded for separate workloads. Swapping the bootscript 
-    when resuming does not seem to have any effect and the simulator will 
-    instead use the bootscript that was initially passed when fast-forwarding.
+    Once the bootscript has created the checkpoint, we can then interrupt the 
+    simulation and restart it with the timing CPU using the \texttt{--cpu-type} 
+    flag, and specify the path to the checkpoint to restore from using the 
+    \texttt{--resume-from} flag. Unfortunately, it seems that the bootscript is 
+    loaded into memory and hence stored along with the checkpoint, meaning 
+    separate bootscripts have to be created and fast-forwarded for separate 
+    workloads. Swapping the bootscript when resuming does not seem to have any 
+    effect and the simulator will instead use the bootscript that was initially 
+    passed to the simulator when fast-forwarding.
+    
+\section{Customising the setups}
+While the provided Python scripts help define almost everything, there are 
+certain things that can be modelled which are not present in the scripts, due to
+their already high complexity. In order to include these things in the 
+simulation, it is therefore necessary to extend and/or modify the provided 
+scripts.
+
+    \subsection{Voltage and Frequency Domains}
+    Part of this project was to look at whether scheduling and DVFS can be 
+    combined to achieve more intelligent, power efficient schedules. Therefore, 
+    we need the system we are simulating to have DVFS capabilities. In gem5, 
+    adding DVFS to a simulation is done by assigning ``Frequency Domains'' to 
+    certain objects. Since DVFS impacts the frequency, i.e. the clock speed, of 
+    the object, any \texttt{ClockedObject} (which the CPU implementations are a 
+    subclass of) can be assigned a Clock Domain. The documentation for adding 
+    DVFS to a system is only available on the old website 
+    \cite{noauthor_experimenting_2019} and it does not detail how to add DVFS 
+    for the \texttt{fs\_bigLITTLE.py} configuration. In order to figure this 
+    out, it is required to look at the script \textit{and} some of the gem5
+    source code.
+    \begin{lstlisting}[caption=Lines 42-52 from 
+    \texttt{gem5/src/sim/VoltageDomain.py}, basicstyle=\sffamily\footnotesize,
+    language=Python]
+class VoltageDomain(SimObject):
+    type = 'VoltageDomain'
+    cxx_header = "sim/voltage_domain.hh"
+    
+    # Single or list of voltages for the voltage domain. If only a single
+    # voltage is specified, it is used for all different frequencies.
+    # Otherwise, the number of specified voltges and frequencies in the clock
+    # domain (src/sim/ClockDomain.py) must match.  Voltages must be specified in
+    # descending order. We use a default voltage of 1V to avoid forcing users to
+    # set it even if they are not interested in using the functionality
+    voltage = VectorParam.Voltage('1V', "Operational voltage(s)")
+    \end{lstlisting}
+    \begin{lstlisting}[caption=Lines 44-69 from 
+    \texttt{gem5/src/sim/ClockDomain.py}, basicstyle=\sffamily\footnotesize,
+    language=Python]
+# Abstract clock domain
+class ClockDomain(SimObject):
+    type = 'ClockDomain'
+    cxx_header = "sim/clock_domain.hh"
+    abstract = True
+
+# Source clock domain with an actual clock, and a list of voltage and frequency
+# op points
+class SrcClockDomain(ClockDomain):
+    type = 'SrcClockDomain'
+    cxx_header = "sim/clock_domain.hh"
+    
+    # Single clock frequency value, or list of frequencies for DVFS
+    # Frequencies must be ordered in descending order
+    # Note: Matching voltages should be defined in the voltage domain
+    clock = VectorParam.Clock("Clock period")
+    
+    # A source clock must be associated with a voltage domain
+    voltage_domain = Param.VoltageDomain("Voltage domain")
+    
+    # Domain ID is an identifier for the DVFS domain as understood by the
+    # necessary control logic (either software or hardware). For example, in
+    # case of software control via cpufreq framework the IDs should correspond
+    # to the neccessary identifier in the device tree blob which is interpretted
+    # by the device driver to communicate to the domain controller in hardware.
+    domain_id = Param.Int32(-1, "domain id")
+    \end{lstlisting}
+    By examining the source code of the Voltage and Clock Domain objects, we 
+    discover several things not apparent in the guide/documentation:
+    \begin{enumerate}
+        \item Voltage and frequency points have to be specified in sorted,
+              descending order.
+        \item There can either be one voltage value for all frequency steps or
+              there must be exactly the same number of voltage and frequency 
+              steps.
+        \item Clock domains have an ID which must be unique.
+    \end{enumerate}
+
+    When looking at the provided system devices in 
+    \texttt{gem5/configs/example/arm/devices.py}, the \texttt{CpuCluster} 
+    constructor already has constructor support for specifying voltage and 
+    clock domains.
+    \begin{lstlisting}[caption=The \texttt{CpuCluster} constructor, 
+    language=Python, basicstyle=\sffamily\footnotesize]
+class CpuCluster(SubSystem):
+    def __init__(self, system,  num_cpus, cpu_clock, cpu_voltage,
+                 cpu_type, l1i_type, l1d_type, wcache_type, l2_type):
+    \end{lstlisting}
+    Passing a list of values to the \texttt{cpu\_clock} and 
+    \texttt{cpu\_voltage} arguments constructs the relevant objects inside the 
+    \texttt{CpuCluster} object. The only part that needs changing is that the 
+    clock domains are not given an ID. This causes the simulator to crash, as 
+    the logic detects that the default ID of $-1$ was given and errors with a 
+    message explaining that clock domains must have a unique ID. As part of the 
+    project, an Odroid N2 board was acquired. By examining its DVFS capabilities
+    using the \texttt{cpupower} tool, it seems the most common setup is to have
+    one DVFS domain per cluster, i.e. per big and LITTLE `part' of the setup.
+    Therefore, I change the line initialising the voltage domain to assign an ID
+    based on the number of clusters in the system. This will return 0 for the 
+    first cluster, i.e. cluster 0, and 1 for the second cluster.
+    \begin{lstlisting}[caption=Modified line 126 of \texttt{devices.py}, 
+    language=Python, basicstyle=\sffamily\footnotesize]
+    self.clk_domain = SrcClockDomain(clock=cpu_clock,
+                                     voltage_domain=self.voltage_domain,
+                                     domain_id=system.numCpuClusters())
+    \end{lstlisting}
+    
+    With the devices modified to correctly set up the DVFS objects in the 
+    simulator, the only thing that remains to be changed is the 
+    \texttt{fs\_bigLITTLE.py} file. In an attempt to model DVFS as realistically
+    as possible, I used clock and voltage steps from the Odroid N2 board that I 
+    had on hand. The clock steps were collected through the \texttt{cpupower} 
+    tool. The voltage steps were harder figure out where to find. It turns out 
+    that Linux provides some insight into the voltage values through the sysfs, 
+    i.e. the \texttt{/sys} file system. There are a number of voltage 
+    regulators at \texttt{/sys/class/regulator/regulator.\{0,1,2\}}. By using 
+    the \texttt{userspace} frequency governor, which scales the frequency to 
+    whatever the user specifies, and the \texttt{cpupower} tool to adjust the 
+    frequency, I was able to narrow down that regulators 1 and 2 control the 
+    voltage of the LITTLE and big clusters respectively. Regulator 0 seems to 
+    not do anything, as running \texttt{cat} on the \texttt{regulator.0/name} 
+    outputs the value ``\texttt{regulator-dummy}'', indicating that the 
+    regulator is unlikely to control anything.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\linewidth]{../screenshots/odroid-stuff/regulator-names.png}
+        \caption{The names of the regulators on the Odroid N2 board}
+    \end{figure}
+
+    \texttt{CpuCluster}    \todo{show+explain extending CpuCluster}
+    
+    \subsection{Power Models}
+    
+    \subsection{Output resolution}
 
 
 
@@ -189,7 +322,6 @@ processor, which also says something about the scale and complexity of gem5.
           customise them, and what changes were made (provide code examples!)
     \item as part of the above, explain the various features that are needed for
           this dissertation and why
-    \item mention cross-compilation, what it is, why it is needed, and how we
-          got it working
-    \item how to interface with the gem5 simulated system
+    \item mention the gemstone-applypower project and why its power equations
+          are meant to be good
 \end{itemize}
