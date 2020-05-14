@@ -35,27 +35,161 @@ building using 13 threads on an 8\textsuperscript{th} generation Intel Core i7
 processor, which also says something about the scale and complexity of gem5.
 
 \section{Configuration and Setup}
-There are two parts of gem5 that can be configured: the simulator binary and 
-its configuration files. The binary produced by \texttt{scons} supports a 
-number of flags which allow the user to specify things like the output 
-directory, whether to redirect gem5's standard output and/or standard error 
-streams, and what to call various files being output. There are also a number 
-of debug flags for developing gem5 itself. The most important of the flags is 
-arguably the \texttt{--outdir} flag used for specifying the output directory. 
-Without specifying the output directory when running multiple simulations side 
-by side, if no directory is specified, i.e. the default \texttt{m5out} 
-directory is used, each instance will try to write to the same files as the 
-others, resulting in non-deterministic race conditions in terms of which 
-process was the last to write to the file, leading to unusable, interweaved 
-output.
+    \subsection{The gem5 binary}
+    There are two parts of gem5 that can be configured: the simulator binary 
+    and its configuration files. The binary produced by \texttt{scons} supports 
+    a number of flags which allow the user to specify things like the output 
+    directory, whether to redirect gem5's standard output and/or standard error 
+    streams, and what to call the various files being output. There are also 
+    anumber of debug flags for developing gem5 itself. The most important of 
+    the flags is arguably the \texttt{--outdir} flag used for specifying the 
+    output directory. When running multiple simulations side by side, if no 
+    directory is specified, i.e. the default \texttt{m5out} directory is used, 
+    each instance will try to write to the same files as the others, resulting 
+    in non-deterministic race conditions in terms of which process was the last 
+    to write to the file, leading to unusable, interweaved output.
+
+    \subsection{Python configuration scripts}
+    After the flags, gem5 takes a Python script containing the setup(s) to run. 
+    Since this is a regular Python script, it is possible to add command line 
+    arguments here as well, allowing for control over the system configuration 
+    without having to change the Python file itself. The gem5 Simulator comes 
+    with a number of example scripts for ARM system simulation, located in the 
+    \texttt{gem5/configs/example/arm} directory. The scripts provide examples 
+    for syscall emulation, full system simulation, and full system simulation 
+    with power models. Syscall emulation is faster than full system simulation 
+    because it only simulates the system calls and their results, and not the 
+    disks, memory, kernel, operating system, etc. Because of this, it is also 
+    less precise. Full system simulation takes a while and requires a lot more 
+    setup. The system has to be specified in its entirety: The full system (FS) 
+    section of the ``Learning gem5'' book \cite{lowe-power_full_nodate} shows 
+    how in order to run a full system simulation, the various caches, disks, 
+    memory controllers, and North and South Bridges (for x86 system simulation) 
+    have to be specified as Python objects. Fortunately, the 
+    \texttt{devices.py} file in the example scripts directory already has all 
+    of this implemented for ARM full system simulation. The example power model 
+    script contains some very simple power models and is likely mainly to show 
+    how the power models are specified and added to the objects that support 
+    them. By default, the full system scripts support flags allowing to specify 
+    the frequency and number of big and LITTLE cores; where the kernel, disk, 
+    bootloader, and bootscript are located; whether to instantiate and simulate 
+    caches; what CPU type to use; whether to restore from a checkpoint; and 
+    much more.
+    
+    \subsection{Bootscripts, systems, and m5 instructions}
+    One of the arguments that must be passed to the simulated system (either 
+    hardcoded in the Python configuration script or passed via a flag) is the 
+    path to the bootscript to run once the OS has booted. The gem5 Simulator 
+    comes with a couple of bootscripts, but these are for simulating distributed
+    compute nodes, e.g. a compute cluster with multiple physical systems 
+    collaborating and communicating over a network, and therefore contains a 
+    lot of networking and other things that are unnecessary for this project. 
+    However, it does provide some insight into how to write these. As far as I 
+    can tell, even though the bootscripts all end in \texttt{.rcS}, the script 
+    itself is simply a bash script with most of the usual bash builtins 
+    supported. One slight complication is that the \texttt{PATH} environment 
+    variable seems to always be unset so absolute paths to programs must be 
+    specified rather than assuming they are available, e.g. you have to use 
+    \texttt{/bin/ls} to list directory contents because \texttt{ls} is not on 
+    the \texttt{PATH}.
+    
+    In order to simulate a full system, a kernel, disk, and bootloader must be
+    provided. The gem5 website hosts a number of Linux disk images at
+    \cite{noauthor_index_2020}. However, the gem5 website has recently been 
+    modernised and in the process the file which displayed an index of 
+    \cite{noauthor_index_2020} seems to have disappeared. Therefore the way to 
+    get these system images is to use an old version of the m5 Simulator's 
+    webpage \cite{noauthor_index_2017} which \textit{does} have an index, copy 
+    the name of the file, and append it to the URL of 
+    \cite{noauthor_index_2020}. This downloads the most recent version of the 
+    system image from the official gem5 website rather than relying on the old 
+    website(s) still being maintained. The system downloaded will typically 
+    contain \texttt{disk} and \texttt{binaries} subdirectories. The 
+    \texttt{disk} directory should contain a disk image (\texttt{.img}) file 
+    with BusyBox \cite{noauthor_busybox_nodate} and an \texttt{init} process 
+    pre-configured. It is possible to mount the disk image through a loopback 
+    device on Linux, using the command
+    \begin{lstlisting}
+    sudo mount -o loop,offset=32256 \
+        /path/to/disk-image.img /path/to/mountpoint
+    \end{lstlisting}
+    The \texttt{offset} specifies where the file system starts on the disk 
+    image and is derived from 63 sectors $\times$ a 512-byte sector size. 
+    Mounting the disk image can be useful in order to find or double-check the 
+    absolute paths of certain programs for use in a bootscript, or to place 
+    custom programs there in order to be able to run them in the simulator. The 
+    \texttt{m5} program, which is specific to interfacing with the simulator 
+    from within the simulated system, comes ``pre-installed'' on the 
+    gem5-provided disk images.
+    
+    The \texttt{m5} program is typically located at \texttt{/sbin/m5} and is 
+    used to pass instructions to the simulator from within the simulated system.
+    If the program is run without passing any arguments, it will print a list of
+    the supported commands. The most useful one is \texttt{m5 checkpoint} which
+    creates a checkpoint at the current simulation tick.
+    
+    \subsection{CPU types and checkpointing}
+    By default, gem5 provides 3 CPU types for ARM system simulation: `timing',
+    `atomic', and `exynos'. The last one likely refers to the Samsung Exynos 
+    platform which may have special simulation requirements beyond the default 
+    ARM systems. As we were not using this platform, I did not look further 
+    into this setting. The `timing' and `atomic' CPU types have a key 
+    difference: the atomic CPU type is a simplified CPU where every instruction 
+    is atomic, i.e. it happens in one go and does not incur latency. This 
+    results in much faster simulations (around 20 minutes to boot Linux 
+    compared to around $1\frac{1}{2}$-2 hours using the timing CPU) at the cost 
+    of 
+    simulation realism. In reality, CPU instructions have a latency associated 
+    with them, and so some instructions take longer than others. The timing CPU 
+    models these latencies. As a result, it is a much more realistic simulation,
+    at the cost of taking a lot longer to simulate.
+    
+    The atomic CPU type is extremely useful for ``fast-forwarding'' and 
+    ``checkpointing''. As previously mentioned, running a full system 
+    simulation with the timing CPU takes a long time to even get the operating 
+    system booted. This is impractical if all we are interested in is the 
+    program being run once the operating system has booted, e.g. if we are 
+    running a benchmark, as only using the timing CPU would result in long wait 
+    times due to a process that the researcher is not interested in. To mitigate
+    this, gem5 allows the user to create and resume from checkpoints: stores of 
+    exact system layout at a specific point in time, which can be used to resume
+    the simulation from this state without needing to redo all the simulation 
+    preceding it. When resuming from a checkpoint, the CPU type can be changed.
+    This allows us to ``fast-forward'' parts of the system we are not interested
+    in by using the atomic CPU and calling the \texttt{m5 checkpoint} 
+    instruction from within the bootscript, before the line(s) where the 
+    bootscript starts the benchmark.
+    \begin{lstlisting}[language=Bash, caption=Example bootscript using 
+    checkpointing]
+    #!/bin/bash
+    
+    echo "bootscript.rcS is running"
+    
+    /sbin/m5 checkpoint
+    echo "Starting workload"
+    /path/to/workload
+    
+    echo "Workload done, exiting simulation."
+    /sbin/m5 exit
+    \end{lstlisting}
+    Once the bootscript has created the 
+    checkpoint, we can then interrupt the simulation and restart it with the 
+    timing CPU using the \texttt{--cpu-type} flag, and specify the path to the 
+    checkpoint to restore from using the \texttt{--resume-from} flag. 
+    Unfortunately, it seems that the bootscript is loaded into memory and hence 
+    stored along with the checkpoint, meaning separate bootscripts have to be 
+    created and fast-forwarded for separate workloads. Swapping the bootscript 
+    when resuming does not seem to have any effect and the simulator will 
+    instead use the bootscript that was initially passed when fast-forwarding.
+
+
 
 \begin{itemize}
-    \item explain how to configure it, both the gem5.opt binary itself and the
-          python scripts
     \item explain the layouts of the various python scripts, the need to
           customise them, and what changes were made (provide code examples!)
     \item as part of the above, explain the various features that are needed for
           this dissertation and why
     \item mention cross-compilation, what it is, why it is needed, and how we
           got it working
+    \item how to interface with the gem5 simulated system
 \end{itemize}
