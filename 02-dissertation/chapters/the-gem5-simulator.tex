@@ -435,14 +435,31 @@ class CpuCluster(SubSystem):
     detailed `timing' CPU type.
     
     \subsection{Output resolution}
-
-
-
-\begin{itemize}
-    \item explain the layouts of the various python scripts, the need to
-          customise them, and what changes were made (provide code examples!)
-    \item as part of the above, explain the various features that are needed for
-          this dissertation and why
-    \item mention the gemstone-applypower project and why its power equations
-          are meant to be good
-\end{itemize}
+    By default, gem5 dumps simulation statistics every simulated second. The 
+    statistics, found in the \texttt{outdir/stats.txt} file, contain numerous 
+    insights and measurements, including memory bus packet sizes, number of 
+    floating point units used, number of instructions committed, and much more. 
+    It is possible to adjust how often gem5 dumps these stats, by using the 
+    \texttt{m5.stats.periodicStatDump} function in the Python configuration 
+    script. The function takes a period in simulated ticks, but gem5 provides a 
+    function \texttt{m5.ticks.fromSeconds} to easily be able to specify the 
+    frequency in seconds and then convert it to simulated ticks.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\linewidth]{screenshots/config-exts/periodic-dump-stats.png}
+        \caption{Lines 129-130 from \texttt{fs\_power.py}, demonstrating how to 
+                 control the stats dump frequency}
+    \end{figure}
+    In \cite{bischoff_gem5_2017-1} slide 16 (Figure 
+    \ref{fig:bischoff-gem5-s16}), it is shown how drastically different stats 
+    dump frequency can affect the resolution of power models. Therefore, I 
+    added a \texttt{--stat-freq} flag to the \texttt{fs\_bL\_extended.py} 
+    script, which allows the user to specify how frequently gem5 should dump 
+    stats, including support for scientific notation, e.g. {\sffamily 1e$-$3} 
+    for milliseconds.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\linewidth]{screenshots/empowering-the-masses-s16.png}
+        \caption{Slide 16 of \cite{bischoff_gem5_2017-1}}
+        \label{fig:bischoff-gem5-s16}
+    \end{figure}
