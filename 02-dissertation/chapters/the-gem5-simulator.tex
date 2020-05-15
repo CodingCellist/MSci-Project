@@ -290,26 +290,71 @@ class CpuCluster(SubSystem):
     With the devices modified to correctly set up the DVFS objects in the 
     simulator, the only thing that remains to be changed is the 
     \texttt{fs\_bigLITTLE.py} file. In an attempt to model DVFS as realistically
-    as possible, I used clock and voltage steps from the Odroid N2 board that I 
-    had on hand. The clock steps were collected through the \texttt{cpupower} 
-    tool. The voltage steps were harder figure out where to find. It turns out 
-    that Linux provides some insight into the voltage values through the sysfs, 
-    i.e. the \texttt{/sys} file system. There are a number of voltage 
-    regulators at \texttt{/sys/class/regulator/regulator.\{0,1,2\}}. By using 
-    the \texttt{userspace} frequency governor, which scales the frequency to 
-    whatever the user specifies, and the \texttt{cpupower} tool to adjust the 
-    frequency, I was able to narrow down that regulators 1 and 2 control the 
-    voltage of the LITTLE and big clusters respectively. Regulator 0 seems to 
-    not do anything, as running \texttt{cat} on the \texttt{regulator.0/name} 
-    outputs the value ``\texttt{regulator-dummy}'', indicating that the 
-    regulator is unlikely to control anything.
+    as possible, I used clock and voltage steps from the Odroid N2 board that
+    was provided for this project. The clock steps were collected through the 
+    \texttt{cpupower} tool. The voltage steps were harder figure out where to 
+    find. It turns out that Linux provides some insight into the voltage values 
+    through the sysfs, i.e. the \texttt{/sys} file system. There are a number of
+    voltage regulators at \texttt{/sys/class/regulator/regulator.\{0,1,2\}}. By 
+    using the \texttt{userspace} frequency governor, which scales the frequency 
+    to whatever the user specifies, and the \texttt{cpupower} tool to adjust 
+    the frequency, I was able to narrow down that regulators 1 and 2 control 
+    the voltage of the LITTLE and big clusters respectively. Regulator 0
+    seems to not do anything, as running \texttt{cat} on the 
+    \texttt{regulator.0/name} outputs the value ``\texttt{regulator-dummy}'', 
+    indicating that the regulator is unlikely to control anything.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.9\linewidth]{../screenshots/odroid-stuff/regulator-names.png}
+        \includegraphics[width=0.9\linewidth]{screenshots/odroid-stuff/regulator-names.png}
         \caption{The names of the regulators on the Odroid N2 board}
     \end{figure}
 
-    \texttt{CpuCluster}    \todo{show+explain extending CpuCluster}
+    In order to model the different DVFS steps for the big and LITTLE clusters,
+    I extended the \texttt{CpuCluster} class into 2 clusters: 
+    \texttt{DVFSBigCluster} and \texttt{DVFSLittleCluster}. These subclasses 
+    were configured identically to the existing \texttt{BigCluster} and 
+    \texttt{LittleCluster} classes, with the exception of specifying different 
+    voltage and clock domains in each one. I also extended the 
+    \texttt{AtomicCluster} class into a \texttt{DVFSBigAtomicCluster} and 
+    \texttt{DVFSLittleAtomicCluster} class, in order to be able to fast-forward 
+    the systems. The changes were made in a copy of the 
+    \texttt{fs\_bigLITTLE.py} file: \texttt{fs\_bL\_extended.py}.
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}{0.45\linewidth}
+            \centering
+            \includegraphics[width=\textwidth]{screenshots/config-exts/dvfs-big-cluster.png}
+            \caption{DVFS values for the big cluster}
+        \end{subfigure}
+        \begin{subfigure}{0.45\linewidth}
+            \centering
+            \includegraphics[width=\textwidth]{screenshots/config-exts/dvfs-little-cluster.png}
+            \caption{DVFS values for the LITTLE cluster}
+        \end{subfigure}
+        \caption{DVFS setups based on the Odroid N2 board}
+    \end{figure}
+    
+    Finally, to wire everything up in the script and be able to use the
+    clusters, big.LITTLE pairs of the clusters were added to the 
+    \texttt{cpu\_types} dictionary, allowing them to be selected through the
+    \texttt{--cpu-type} flag, and as shown in one of examples in the old 
+    documentation \cite{noauthor_experimenting_2019}, the system's DVFS-handler
+    was configured and enabled in cases where the DVFS clusters were being used.
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}{0.9\linewidth}
+            \centering
+            \includegraphics[width=\textwidth]{screenshots/config-exts/cpu-types.png}
+            \caption{The DVFS clusters included in \texttt{cpu\_types}}
+        \end{subfigure}
+        \begin{subfigure}{0.9\linewidth}
+            \centering
+            \includegraphics[width=\textwidth]{screenshots/config-exts/dvfs-handler.png}
+            \caption{If DVFS models are used, configure and enable the DVFS 
+                     handler}
+        \end{subfigure}
+        \caption{Extensions made to be able to use the DVFS extensions}
+    \end{figure}
     
     \subsection{Power Models}
     
