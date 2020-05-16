@@ -1,14 +1,117 @@
 \section{Adding benchmarks to the disk image}
+For simulating workloads, the Splash 3 benchmark \cite{sakalis_splash-3_2016} 
+was chosen. Splash 3 is an iteration on Splash 2 which removes data races from 
+the programs used in the benchmarks \cite{sakalis_splash-3_2016}.
+
+The Splash 3 makefile does not provide a convenient \texttt{CROSS\_COMPILE} 
+setting for cross compilation. I initially attempted to add this to the 
+makefile but was unsuccessful in getting the the benchmark series to build with 
+the cross compiler. It turned out that some of the benchmark programs compile 
+and run a smaller sub-program as part of their build process, making it 
+impossible to cross compile them due to binary incompatibility between the 
+intermediary programs and the host x86 system. To mitigate this, I copied the 
+benchmark files to a USB-stick and compiled them on the Odroid N2 board.
+
+The disk image provided with the 
+\href{http://dist.gem5.org/dist/current/arm/aarch-system-20170616.tar.xz}{aarch-system-20170616}
+files fortunately had enough space to fit the entire compiled Splash 3 
+benchmark. Before copying the files to this, I had attempted to set up my own 
+disk image in order to be certain that there was enough space and that only the 
+things I needed were on there. Creating a file, mounting it using a loopback 
+device, and creating a file system on it was fine. However, in order to have a 
+fully functional system, several tools and libraries had to be installed, e.g. 
+a C standard library. Looking further into it, it seemed very close to Linux 
+From Scratch, or creating a Linux distribution, which was far beyond the scope 
+and time constraints of the project. Once the existing disk image was mounted 
+(method detailed in Section \ref{subsec:bootscripts-systems-m5}), the files 
+were placed in a new \texttt{splash3} directory created at root.
 
 \section{Setups}
+The gem5 Simulator supports up to 64 cores when modelling ARM systems 
+\cite{noauthor_gem5_nodate}. As the number of cores being simulated increases, 
+so does the simulation time. Both due to time constraints and the number of 
+computational resources available, I decided to run 8 different setups: 1b1L, 
+2b2L, 3b3L, 4b4L, 2b4L, 4b2L, 1b3L, and 3b1L. The 4b2L setup is the same setup 
+as the Odroid N2 board, and the other setups should give a good opportunity to 
+examine how the programs behave when having equal numbers of big and LITTLE 
+cores, and when there is an imbalance between the number of big and LITTLE cores
+available.
+
+The Splash 3 benchmark comes with a README file containing recommended inputs 
+for running the programs in a simulator. Common across all the programs is that 
+the number of threads can be specified, either through a flag or a specific 
+input file. As such, I decided setup benchmark runs with 1, 2, 4, 8, and 16 
+threads in order to have a variety of both under- and over-loaded usage across 
+all the hardware configurations.
+
+The latest Long Term Support (LTS) is version 5.4, released in Spring 2020. 
+Since none of the gem5-hosted disk images use this kernel, and in order to have 
+better control over what frequency governor was being used, I downloaded, 
+configured and cross compiled version 5.4.24 (released on the 
+5\textsuperscript{th} of March 2020) with only the \texttt{ondemand} frequency 
+governor available and set as the default governor. This frequency governor 
+should increase the DVFS points under load (on demand) and seems to be the most 
+available on real hardware as both the Odroid boards (from hardkernel) and 
+HiKey boards (from 96 Boards) use custom subversions of kernel 4.9 which is 
+from before EAS and the \texttt{schedutil} governor were introduced.
 
 \section{Running}
-
-\begin{itemize}
-    \item mention cross-compilation, what it is, why it is needed, and how we
-          got it working
-    \item mention cross-compiling bootloaders
-    \item mention which benchmark we are using and why
-    \item explain what parts of it do
-    \item detail the setups and explain why they are each created
-\end{itemize}
+    \subsection{Technical details}
+    The School of Computer Science's `\texttt{sif}' cluster was used to run the 
+    simulations. It contains 12 micro servers, with each one having dual 
+    quad-core Intel Xeon CPUs at 3.4GHz and 16GB of RAM, running Linux Fedora 
+    28. Since the cluster is shared between all research staff, 9 of the 12 
+    micro servers were used to run simulations. Each node was set up with 
+    \texttt{gem5.opt} version 2.0, from the git stable branch, with the patches
+    supplied in \cite{hansen_gem5-319_2020} applied in order to make the stats 
+    framework function.
+    
+    \subsection{Scripts}
+    Several layers of scripts were created. First, a number of bootscripts were 
+    created, one for each benchmark program and the number of threads to use, 
+    i.e. 5 bootscripts per benchmark. These scripts can be found in the 
+    \texttt{gem5-bootscripts/benchmarks} directory, grouped into subdirectories 
+    by benchmark program name.
+    
+    In order to facilitate starting the simulations, a number of bash scripts 
+    were created. These took 6 command line arguments: the absolute path to the 
+    \texttt{gem5} directory, the number of big cores, the number of LITTLE 
+    cores, the number of threads, the path to the top-level directory in which 
+    to place outputs, and optionally the name of the frequency governor to use. 
+    The last argument was in case I managed to have time to run different 
+    governors to compare and defaulted to \texttt{ondemand}. Each script set up 
+    the simulator to redirect standard out and standard error, produce a DVFS 
+    config file, and set the output directory in a hierarchy of: program name, 
+    big.LITTLE configuration, and input file and number of threads combined 
+    with the frequency governor name. For the scripts which were to fast-forward
+    the simulations, the stats output was fixed to \texttt{/dev/null} and the 
+    CPU-type to \texttt{dvfs-atomic}. For the scripts which were resuming from 
+    a checkpoint, an extra command line argument was added in order to be able 
+    to specify the path to the checkpoint to resume to. Additionally, the 
+    resuming scripts kept the stats output, set the CPU-type to the slower but 
+    more detailed \texttt{dvfs-timing} model, and set the stats dump frequency 
+    to once every simulated millisecond. These scripts can be found in the 
+    \texttt{gem5-commands/benchmarks} directory. The scripts starting with 
+    \texttt{ff-} are the fast-forwarding scripts.
+    
+    Finally, in order to facilitate the fast-forwarding and resuming of 
+    simulations across the various hardware configurations, and in order easily 
+    manage the output directories, the scripts in \texttt{gem5-commands/configs}
+    and \texttt{gem5-commands/resume-roi} were created. The scripts in the 
+    \texttt{configs} subdirectory loop over the thread settings. For each thread
+    setting, the script starts 8 instances of the simulator, one per big.LITTLE 
+    config, with a timeout of 2 hours. This is enough time for most of the 
+    benchmarks to boot the kernel, create a checkpoint, and maybe start 
+    computation, apart from the \texttt{ocean-non-contiguous} benchmark, which 
+    required a timeout of 4 hours. All of the output was put in a 
+    \texttt{fast-forward} directory in order to easily be able to distinguish 
+    the output from fast-forwarded simulations. The scripts in the 
+    \texttt{resume-roi} subdirectory behave almost exactly the same as the ones 
+    in the \texttt{configs} subdirectory, apart from finding the checkpoint to 
+    resume from, using the non-fast-forwarding scripts, and putting the output 
+    in a \texttt{roi-out} directory. They also wait for all instances in a 
+    thread setting to finish before starting the next one, in order to not 
+    overload the 8 cores available on each micro server.
+    
+    Each node (i.e. micro server) in the cluster was sent the scripts, with each
+    node running the script relevant to a specific benchmark program.
