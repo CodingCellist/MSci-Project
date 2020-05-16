@@ -209,6 +209,35 @@ most responsive: tab completion takes around 30 seconds, simple commands like
 \texttt{ls} take 10-20 seconds to execute, and it is possible to follow the 
 line printing with the naked eye. Fast-forwarding and using custom bootscripts 
 is the most straightforward and painless way to use the system.
+
+\section{Cross Compilation}
+In order to be able to compile and run custom experiments on the simulated 
+system, a cross compiler is needed. The x86 system(s) running the simulator are 
+based on a different ISA than ARM and so programs compiled for x86 will not run 
+on ARM due to differences in the assembler and binary instructions. A cross 
+compiler is a program which runs on one ISA and compiles programs for a 
+different ISA, e.g. an x86 program which produces ARM binaries. The ARM 
+Developer webpage provides a GNU toolchain which contains the entire GNU 
+Compiler Collection, including cross compilers for x86 based systems 
+\cite{noauthor_gnu_2019}. The systems I was examining were ARMv8, i.e. AArch64, 
+systems so the {\sffamily aarch64-none-linux-gnu} cross compiler was used. I 
+discovered that this cross compiler also produced binaries which were 
+compatible with the Odroid N2 board and vice-versa: programs compiled on the 
+Odroid N2 ran in the simulator when copied over to a disk image. Some programs, 
+e.g. the Linux kernel, provide a \texttt{CROSS\_COMPILE} setting in the 
+makefile, which can be set to instruct make to use the cross compilation 
+toolchain instead of the host ISA's default toolchain, thereby facilitating 
+cross compilation. The gem5 Simulator comes with two useful programs that may 
+need cross compiling: ARM bootloaders and \texttt{m5}.
+
+If setting up a different system from the provided ones, a bootloader is
+required for full system simulation. The source code for ARM bootloaders is 
+provided in \texttt{gem5/system/arm/bootloader/arm[64]/} for 32-bit ARMv7 and 
+64-bit ARMv8 respectively. If additionally, a custom disk image is being 
+prepared, the \texttt{m5} program used to interface with the simulator needs to 
+be cross compiled and put on the image. The source code is found at 
+\texttt{gem5/util/m5/} and for ARMv8, the \texttt{Makefile.aarch64} should be 
+used.
     
 \section{Customising the setups}
 While the provided Python scripts help define almost everything, there are 
