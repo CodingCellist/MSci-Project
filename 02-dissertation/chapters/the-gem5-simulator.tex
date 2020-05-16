@@ -117,16 +117,23 @@ processor, which also says something about the scale and complexity of gem5.
     image and is derived from 63 sectors $\times$ a 512-byte sector size. 
     Mounting the disk image can be useful in order to find or double-check the 
     absolute paths of certain programs for use in a bootscript, or to place 
-    custom programs there in order to be able to run them in the simulator. The 
-    \texttt{m5} program, which is specific to interfacing with the simulator 
-    from within the simulated system, comes ``pre-installed'' on the 
-    gem5-provided disk images.
+    custom programs there in order to be able to run them in the simulator. One 
+    crucial detail which seems to be missing in the gem5 documentation is that 
+    in order for gem5 to be able to run the full system, the environment 
+    variable \texttt{M5\_PATH} has to be exported to contain the absolute path 
+    to the system files, i.e. the directory containing the `\texttt{binaries}' 
+    and `\texttt{disks}' subdirectories. If \texttt{M5\_PATH} is not exported 
+    to this, gem5 will error saying that the files were not found on the path; 
+    there is no indication or mention of what path was searched. However, it is 
+    documented in the ARM Research Starter Kit \cite{tousi_arm_2017}.
     
-    The \texttt{m5} program is typically located at \texttt{/sbin/m5} and is 
-    used to pass instructions to the simulator from within the simulated system.
-    If the program is run without passing any arguments, it will print a list of
-    the supported commands. The most useful one is \texttt{m5 checkpoint} which
-    creates a checkpoint at the current simulation tick.
+    The \texttt{m5} program, which is specific to interfacing with the simulator
+    from within the simulated system, comes ``pre-installed'' on the 
+    gem5-provided disk images. It is typically located at \texttt{/sbin/m5} and 
+    is used to pass instructions to the simulator from within the simulated 
+    system. If the program is run without passing any arguments, it will print 
+    a list of the supported commands. The most useful one is \texttt{m5 
+    checkpoint} which creates a checkpoint at the current simulation tick.
     
     \subsection{CPU types and checkpointing}
     By default, gem5 provides 3 CPU types for ARM system simulation: `timing',
@@ -181,6 +188,27 @@ processor, which also says something about the scale and complexity of gem5.
     workloads. Swapping the bootscript when resuming does not seem to have any 
     effect and the simulator will instead use the bootscript that was initially 
     passed to the simulator when fast-forwarding.
+    
+\section{Interacting with the simulated system}
+It is possible to connect a terminal emulator to the simulated system and 
+interact with it through this. The system's output is exposed on port 3456 by 
+default, incrementing by 1 as simulations are run in parallel (i.e. 3457 for 
+simulation 2, 3458 for simulation 3, etc.). Once option is to connect via the 
+\texttt{telnet} command. However, gem5 also comes with a terminal emulator: 
+\texttt{m5term}. The source code for it is found at \texttt{gem5/util/term/} 
+and it needs to be compiled. Once \texttt{m5term} has been compiled, it can be 
+connected to a system by running the command \texttt{./m5term <port>}, 
+replacing \texttt{<port>} with the port number. For example, to log in to the 
+simulated system, a bootscript containing the line \texttt{/sbin/getty 38400 
+ttyAMA0} has to be used. This creates a login prompt which can then be used to 
+log in using the username and password `root'. However, it is somewhat 
+difficult to log in before the timout of 60 seconds occurs: key presses take a 
+long time to be properly registered by the simulated system. Additionally, due 
+to the complexity of running a full system simulation, the system is not the 
+most responsive: tab completion takes around 30 seconds, simple commands like
+\texttt{ls} take 10-20 seconds to execute, and it is possible to follow the 
+line printing with the naked eye. Fast-forwarding and using custom bootscripts 
+is the most straightforward and painless way to use the system.
     
 \section{Customising the setups}
 While the provided Python scripts help define almost everything, there are 
@@ -262,12 +290,17 @@ class SrcClockDomain(ClockDomain):
     \texttt{gem5/configs/example/arm/devices.py}, the \texttt{CpuCluster} 
     constructor already has constructor support for specifying voltage and 
     clock domains.
-    \begin{lstlisting}[caption=The \texttt{CpuCluster} constructor, 
-    language=Python, basicstyle=\sffamily\footnotesize]
-class CpuCluster(SubSystem):
-    def __init__(self, system,  num_cpus, cpu_clock, cpu_voltage,
-                 cpu_type, l1i_type, l1d_type, wcache_type, l2_type):
-    \end{lstlisting}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{screenshots/cpu-cluster-constructor.png}
+        \caption{The \texttt{CpuCluster} constructor}
+    \end{figure}
+%    \begin{lstlisting}[caption=The \texttt{CpuCluster} constructor, 
+%    language=Python, basicstyle=\sffamily\footnotesize]
+%class CpuCluster(SubSystem):
+%    def __init__(self, system,  num_cpus, cpu_clock, cpu_voltage,
+%                 cpu_type, l1i_type, l1d_type, wcache_type, l2_type):
+%    \end{lstlisting}
     Passing a list of values to the \texttt{cpu\_clock} and 
     \texttt{cpu\_voltage} arguments constructs the relevant objects inside the 
     \texttt{CpuCluster} object. The only part that needs changing is that the 
@@ -280,12 +313,17 @@ class CpuCluster(SubSystem):
     Therefore, I change the line initialising the voltage domain to assign an ID
     based on the number of clusters in the system. This will return 0 for the 
     first cluster, i.e. cluster 0, and 1 for the second cluster.
-    \begin{lstlisting}[caption=Modified line 126 of \texttt{devices.py}, 
-    language=Python, basicstyle=\sffamily\footnotesize]
-    self.clk_domain = SrcClockDomain(clock=cpu_clock,
-                                     voltage_domain=self.voltage_domain,
-                                     domain_id=system.numCpuClusters())
-    \end{lstlisting}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{screenshots/cpu-cluster-clock-domain-assignment.png}
+        \caption{Modified line 126 of \texttt{devices.py}}
+    \end{figure}
+%    \begin{lstlisting}[caption=Modified line 126 of \texttt{devices.py}, 
+%    language=Python, basicstyle=\sffamily\footnotesize]
+%    self.clk_domain = SrcClockDomain(clock=cpu_clock,
+%                                     voltage_domain=self.voltage_domain,
+%                                     domain_id=system.numCpuClusters())
+%    \end{lstlisting}
     
     With the devices modified to correctly set up the DVFS objects in the 
     simulator, the only thing that remains to be changed is the 
