@@ -1,12 +1,75 @@
+\section{Raw data}
+The simulations took varying amounts of time to complete with some of the longer
+programs taking 30-40 hours per thread version. Therefore, it took around a week
+before the majority of the data was available, with only the \texttt{volrend} 
+program runs still going; they seemed to take around 70 hours each. Excluding 
+the \texttt{volrend} benchmark, there was 320 simulations to retrieve: 8 
+benchmarks $\times$ 8 big.LITTLE configurations $\times$ 5 different number of 
+threads. A total of 120GB of raw text data was accumulated from the programs 
+excluding \texttt{volrend}, with each \texttt{stats.txt} file typically being 
+between 2.5-4 million lines long. However, as most of the stats recorded by the 
+simulator are much more detailed than what could be recorded and used by using 
+PMUs, the extracted data size is much smaller.
+
+    \subsection{Problems encountered}
+        \subsubsection{Network outage}
+        As mentioned, the \texttt{volrend} benchmark took significantly longer 
+        than the other programs being run on the simulator. Unfortunately, this 
+        meant that it was still running during the University-wide network 
+        outage that occurred on the 9\textsuperscript{th} of May. Although the 
+        vast majority of the University's network infrastructure was restored 
+        quickly, it took a while before access to the cluster was 
+        re-established. Furthermore, it seems the network outage affected the 
+        \texttt{tmux} sessions that were being used to run the benchmarks, 
+        despite them being local to the micro server, and so the 
+        \texttt{volrend} data is incomplete and was inaccessible until shortly 
+        before the deadline. Because of these issues, the \texttt{volrend} data 
+        was not used for the project.
+    
+        \subsubsection{Benchmark crashes}
+        Each bootscript was set to print the line ``\texttt{Benchmark done, 
+        exiting simulation.}'' once the benchmark had returned. This allowed me 
+        to easily be able to tell if the runs had completed successfully, in 
+        case some of them crashed. Unfortunately, once the data was downloaded 
+        from the various micro servers and assembled in one place, it became 
+        apparent that despite running for a long time, a lot of the benchmarks 
+        seemed to have crashed near the end of their execution. By counting the 
+        number of times the ``\texttt{Benchmark done}[...]'' line occurred, the 
+        following completion ratios were obtained:
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{l|c|c|r}
+                \textbf{benchmark} & \textbf{n\_finished} & \textbf{n\_crashed} 
+                & \textbf{completion\_ratio} \\
+                \hline
+                \texttt{barnes} & 20 & 20 & 50.0\% \\
+                \texttt{fmm} & 9 & 31 & 22.5\% \\
+                \texttt{ocean-contiguous\_partitions} & 13 & 27 & 32.5\% \\
+                \texttt{ocean-non\_contiguous\_partitions} & 0 & 40 & 0.0\% \\
+                \texttt{radiosity} & 13 & 27 & 32.5\% \\
+                \texttt{raytrace} & 8 & 32 & 20.0\% \\
+                \texttt{water-nsquared} & 9 & 31 & 22.5\% \\
+                \texttt{water-spatial} & 5 & 35 & 12.5\% \\
+            \end{tabular}
+            \caption{Completion ratios for the various benchmarks}
+        \end{table}
+        As mentioned earlier, most of the crashed benchmarks seem to have 
+        crashed towards the end of their execution. The exception is the 
+        \texttt{ocean-non\_contiguous\_partitions}, which seems to have crashed 
+        within milliseconds of starting. When plotting the power usage of the 
+        cores for some of the benchmarks (Appendix \ref{ch:power-plots}), it 
+        becomes clear that the crashes occurred very near the end of the 
+        benchmark runs. If one were to look purely at the plots, it would be 
+        difficult to say which crashed and which did not, especially as they 
+        both exhibit the same power consumption behaviour. Therefore, the data 
+        from the crashed benchmarks was kept in the final data set.
+    
+\section{Data extraction}
+
 \begin{itemize}
-    \item mention that some experiments crashed
-    \item argue that it doesn't really matter, based on time spent
-    \item mention that ocean-non-contiguous completely died
-    \item mention the network outage bc. it meant one bm. was inaccessible
-    \item detail a couple of power plots
-    \item mention how many runs were done
     \item explain what stats were focused on and why (PMUs!)
     \item as part of the above, include screenshots defending choice of 
           branchPred stats
     \item hopefully have some meaningful machine learning here?
+    \item detail a couple of power plots
 \end{itemize}
