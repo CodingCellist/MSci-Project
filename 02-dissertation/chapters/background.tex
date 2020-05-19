@@ -1,0 +1,238 @@
+\section{Processes and Threads}
+The scheduling problem has been around for a while. The earliest papers which
+discuss scheduling date back to 1962 \cite{corbato_experimental_1962}, with
+hard real-time scheduling (i.e. scheduling for systems where time limits
+\textit{must} be met) dating back to 1973 \cite{liu_scheduling_1973}, and
+preemptive scheduling being discussed in 1975 \cite{kleinrock_computer_1976}. In
+this section I will give an overview of the scheduling problem, explaining some
+key concepts and problems, basing a lot on Silberschatz et al.'s book on
+operating systems \cite{silberschatz_operating_2014}.
+
+Code running is represented as a \textit{process}. Processes contain the code
+being run, information such as what process started the current process (its
+\textit{parent}), what process(es) the current process has created (its
+\textit{children}), the state of the process (e.g. `running', `waiting',
+`ready'), and also some information about the current memory and scheduling
+information about the process's priority, how long it has been running for, etc.
+A process may contain multiple \textit{threads}. A thread is a simple unit of
+computation or work being done. A thread has an ID and contains a stack, a
+register set, and a program counter. The other parts, e.g. the code or memory
+information, is stored in the process running the thread and is shared between
+all the process's threads. Hence, creating new threads and inter-thread
+communication is cheaper than creating new processes and inter-process
+communication. This is useful for processes which want to do different, often
+independent things in parallel, e.g. a web browser fetching data from the
+internet whilst also handling the user's keystrokes. It can also be useful if
+the problem being solved can be broken up into smaller parts which can then be
+done in parallel.
+
+In most major operating systems, MacOS, Windows, Solaris, and Linux, there are
+both user threads and kernel threads. Kernel threads, as the name implies, are
+managed directly by the operating system kernel. User threads, on the other
+hand, are created and managed by the user/programmer. Kernel threads are more
+expensive to create than user threads and as such, most operating systems map
+user threads to kernel threads during runtime. This means that the
+user/programmer does not have to worry about how many threads they create, and
+that the operating system can reuse kernel threads for various applications,
+thereby improving performance. When it comes to scheduling, the scheduler
+manages kernel threads.
+
+\section{Scheduling}
+When talking about scheduling, the terms ``process scheduling'' and ``thread
+scheduling'' are often used interchangeably. To avoid confusion with the
+previous section and to be consistent with commonly used Linux terminology, I
+will use ``task'' to refer to anything, be it a process or a thread, which needs
+to be scheduled. Scheduling is the problem determining what tasks need to run
+and for how long. Most tasks do not require constant computation. Instead,
+computation happens in bursts and the other time is, for example, spent on
+waiting for I/O to happen, e.g. reading a value from memory. So in order to
+maximise CPU usage, a scheduler swaps different tasks on the CPU(s). Another
+reason scheduling is required, is that if the scheduler did not swap the tasks,
+a single CPU-intensive task could hog the CPU for a long time. On interactive
+systems, this could result in loss of interactivity (aka. ``freezing'') until
+the heavy task finishes its computations. By swapping tasks, the scheduler tries
+to keep the CPU-usage as fair as possible. This swap can be done when a task
+signals that it is waiting, or when it finishes. This is known as
+\textit{non-preemptive} scheduling. By contrast, \textit{preemptive} scheduling
+is when the scheduler may pause a task mid-execution in order for a different
+task to have some time on the CPU as well, thereby ensuring that no one task
+hogs the CPU leading to the other tasks being unresponsive.
+
+Ideally, the perfect scheduler would let the task that has the least time left
+run first, thereby minimising the wait time for the other tasks. However, this
+would require the scheduler to know the future (i.e. when the various tasks
+would stop) and is therefore unfortunately impossible. Instead, there exist
+various scheduling algorithms which are used to determine what task to run next.
+One way to determine this is to assign the tasks a priority and execute the
+highest-priority task first. This works fine if the high-priority jobs finish.
+However, there is a very real risk that a low-priority job may never be run as
+it is kept at the back of the queue by higher-priority jobs. As such, priority
+scheduling is rarely used in its na{\" i}ve version, with modern scheduling
+algorithms changing the priority of a task over time, based on various
+variables. One example of this is the Linux ``Completely Fair Scheduler'' (CFS)
+which was introduced in kernel 2.6.23
+\cite{noauthor_cfs_nodate}.
+
+    \subsection{The Completely Fair Scheduler}
+    Typically, the tasks that are waiting to be executed on the CPU are stored
+    in a so-called ``ready queue''. However, the CFS stores the tasks in a
+    data structure known as a Red-Black tree (RB-tree). RB-trees were first
+    introduced in 1978 by Guibas and Sedgewick \cite{guibas_dichromatic_1978}.
+    An RB-tree is a type of self-balancing binary tree. In addition to having
+    the usual binary tree attributes (a key, the left children being less than
+    their parent, and the right children being greater than their parent), each
+    node in the tree is given a colour, red or black, and the tree balances
+    itself by maintaining the following three properties:
+    \begin{enumerate}
+        \item The root of an RB-tree is black.
+        \item The children of a red node are black.
+        \item The paths going from the root to a \texttt{null} leaf all contain
+              the same number of black nodes.
+    \end{enumerate}
+    A complete overview of how the operations on RB-trees work is beyond the
+    scope of this dissertation. The important attribute is that, like other
+    self-balancing trees, an RB-tree maintains a height that is very close to
+    (or exactly) $log N$, regardless of how many operations have been performed,
+    allowing lookup to stay $O(log N)$. By keeping the tasks in an RB-tree, the
+    CFS can access them quickly while the data structure makes sure to permute
+    the tasks according to their priority. To further increase performance, the
+    CFS caches a pointer to the leftmost node in RB-tree.
+    \\
+    
+    The CFS distinguishes between real-time tasks and `normal' tasks. Real-time
+    tasks have a regular priority and are scheduled accordingly. Normal tasks
+    each have a virtual runtime (\texttt{vruntime}) and a ``nice value''. The
+    \texttt{vruntime} is used as the key for the RB-tree storing the tasks and
+    the CFS schedules the leftmost leaf in the RB-tree. The nice value is an
+    integer between $-20$ and $+19$ which affects the recorded \texttt{vruntime}
+    for that task. A task's \texttt{vruntime} is equal to its actual/physical
+    runtime (the time it spent on the CPU) and some modifier based on the task's
+    nice value. A negative nice value leads to a lower \texttt{vruntime} than
+    actual runtime, a nice value of 0 to an equal value, and a positive nice
+    value to a greater \texttt{vruntime} than the actual runtime. This means
+    that a task can ``be nice'' to other tasks by setting its nice value higher,
+    resulting in a bigger \texttt{vruntime}, leading it to be scheduled less
+    often than other tasks. And conversely, tasks with a low nice value will be
+    scheduled more often despite them potentially taking up more physical
+    runtime. All tasks eventually get to run, as a task's \texttt{vruntime} can
+    only increase, meaning that even if it does so slowly (due to a low nice
+    value) it will eventually be greater than a task whose \texttt{vruntime} has
+    not changed because it was not being scheduled. This task will then be the
+    leftmost node, and so it will get scheduled.
+    
+    \subsection{Multicore Scheduling}
+    Most modern CPUs have multiple processing elements, or cores, on the
+    physical chip. These chips are referred to as multicore processors. Each
+    core on the chip has its own set of registers and level 1 (L1) cache, with
+    the other memory components typically being shared across all the processing
+    cores. Having multiple cores can help in terms of \textit{load balancing},
+    i.e. tasks can be spread across the different cores in order to give them as
+    much runtime as possible without one single core having to run all the
+    tasks. However, tasks cannot easily be resumed on any processor.
+    When swapping a task back in, the scheduler must make sure that the
+    processor and memory state is the same as when the task was swapped out.
+    Since each core has its own set of registers and cache, this means that it
+    is simpler to restore a task to the core it previously ran on, compared to
+    transferring all the task's information to a different core, invalidating
+    the information on the old core, and then restoring the layout on the other
+    core. This is what is known as processor \textit{affinity}; the task has an
+    \textit{affinity} for running on the same core it was swapped out from.
+    Because it is impossible to know how quickly a task will finish, it is
+    possible that some cores will run out of tasks before other ones. In this
+    case, it is necessary to do \textit{load balancing}. This typically involves
+    migrating a task from one core to another. There are two ways a task can be
+    migrated: \textit{push migration} and \textit{pull migration}. Pull
+    migration is when an `empty' core transfers a ready task from a busy core to
+    itself, `pulling' the task to it. Push migration, on the other hand, is when
+    an external process notices that it may be better to migrate a task to a
+    different core and `pushes' that task from its original core to the new
+    core. Since these two migration techniques are not mutually exclusive, the
+    CFS implements both. As previously discussed, migrating a task disturbs its
+    affinity and incurs a lot of overhead. There is no perfect way of
+    prioritising one over the other and schedulers have to strike a balance when
+    managing the tasks of multicore chips, further complicating the already
+    complex scheduling problem.
+
+\section{ARM big.LITTLE architecture}
+When running code on CPUs, the code is written, compiled to assembler, and then
+assembled into an executable binary. How the machine code that the CPU runs
+behaves is defined by its Instruction Set Architecture (ISA). An ISA defines the
+registers available; what operations are available, how many arguments they
+take, and how they behave; how memory is addressed and many other things. When
+implementing an ISA, for example when designing a CPU, the physical circuitry
+representing different parts of the ISA may be drastically different between
+various implementations, but the operations and results are the same (e.g. an
+\texttt{ADD} instruction from an ISA implemented on two different CPUs should
+behave the same regardless of how the internals of the CPU look).
+
+Having different CPUs implement the same ISA is extremely useful as it allows
+for binary compatibility as long as the code is compiled for the ISA being used.
+A classic example of this is the x86 ISA which most modern desktop and laptop
+processors implement. The same software that runs on a desktop CPU can be run on
+a laptop CPU without needing to recompile it. The ARM big.LITTLE architecture
+takes this concept one step further by introducing asymmetric single-ISA
+multiprocessors (ASMs): A chip which contains multiple, different CPUs
+implementing the same ISA. The name ``big.LITTLE'' refers to the two CPU/core
+types, `big' and `LITTLE'. The big cores are more powerful but consume more
+power, whereas the LITTLE cores are less powerful but also consume less power.
+This benefits systems where power is limited, e.g. mobile phones, as the LITTLE
+cores can be used for tasks that are not performance-critical, with the big
+cores only being used when necessary, thereby saving power. Additionally, since
+the CPUs are located on the same chip, they have access to the same memory and
+so tasks can be migrated between cores to save power or (hopefully) increase
+performance. However, as with the introduction of multicore, the introduction of
+ASM systems adds a layer of complexity to scheduling: What tasks should run on
+big cores vs. LITTLE cores? When should tasks be migrated from one to the other?
+When a new task arrives, how do we know what type of core to start it on (in
+order to minimise migration overhead)?
+
+    \subsection{Performance Monitoring Units}
+    Some of the more recent ARM ISAs, e.g. ARMv7 and ARMv8, specify Performance
+    Monitoring Units (PMUs). These are special registers and events which allow
+    the hardware to monitor and report certain statistics which can then be
+    examined, either using an external tool or inline assembler. The PMUs can
+    monitor events like the number of CPU cycles passed, the number of level 2
+    (L2) cache accesses, the number of memory access, how many times the branch
+    predictor speculatively executed a branch, and more. The PMUs have to be
+    enabled by the kernel by setting certain bits in a special register (bit 0
+    of \texttt{PMCR\_EL0} in the case of ARMv8) to 1 (\texttt{True}). After
+    this, special ``event numbers'' can be written to other special registers in
+    order to specify what events to count. The cores used in this project (i.e.
+    Cortex A73 cores for big and Cortex A53 cores for LITTLE) support the cycle
+    counter and 6 additional PMU events
+    \cite{noauthor_arm_2015,noauthor_arm_2016}. Since PMUs can be accessed
+    programmatically using inline assembler, it should theoretically be possible
+    to use these to make informed scheduling decisions. At the cost of yet
+    another thing to consider when scheduling.
+
+\section{Dynamic Voltage and Frequency Scaling}
+CPUs used to run at a fixed frequency. As processor design and manufacturing
+improved, it became possible to change a CPU's frequency dynamically, either
+through the BIOS or the Operating System (OS). With dynamic frequency scaling,
+the CPU could be throttled down when idle, thereby saving power, and throttled
+back up (or sometimes even automatically overclocked) when performance was
+required. Running a CPU at higher frequencies requires higher voltages in order
+for the gates in the CPU to stabilise fast enough. If they do not stabilise
+before the next frequency tick/clock pulse, the hardware output of that CPU gate
+will be unreliable and/or incorrect. Dynamic Voltage and Frequency Scaling
+(DVFS) is a technique which saves power by, as the name suggests, varying the
+frequency and voltage on the fly. It was introduced as an energy savings measure
+in 1990 \cite{macken_voltage_1990} and is in every modern computer system. The
+Linux kernel supports DVFS through its \texttt{cpufreq} interface and the
+``frequency governors'' which decide how to change the frequencies
+\cite{wysocki_cpu_nodate}. DVFS is also supported on ARM CPUs, including
+big.LITTLE setups, potentially allowing for even greater power savings than the
+big.LITTLE setup on its own. However, as with all the previously discussed
+topics, DVFS adds complexity to the scheduling problem.
+\\
+
+To sum up, in order to have both good performance and power efficient, a
+scheduler could take into account:
+\begin{itemize}
+    \item What type of core the task(s) run on (big or LITTLE),
+    \item whether it is worth migrating a task between cores \textit{and}
+          between core types,
+    \item and whether it is worth running the cores at full speed and voltage
+          or if some cores could be throttled to save power at a slight
+          performance hit.
+\end{itemize}

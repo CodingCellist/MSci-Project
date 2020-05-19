@@ -1,0 +1,76 @@
+\documentclass[12pt]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6in,8in}]{geometry}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage[british]{babel}
+\usepackage[hyperref]{xcolor}
+\usepackage{pdfpages}
+\usepackage{listings}
+
+\usepackage{todonotes}
+
+% bibliography setup
+\usepackage[backend=biber, maxnames=3, style=numeric, giveninits=true, sortcites=true]{biblatex}
+\DeclareNameAlias{author}{family-given}
+\addbibresource{CS5199-references.bib}
+
+% interactive pdf
+\usepackage{hyperref}
+\usepackage{url}
+\hypersetup{colorlinks=true, citecolor=black, linkcolor=blue}
+
+
+\begin{document}
+    \input{titlepage/titlepage}
+    
+    \pagenumbering{roman}
+    
+    \chapter*{Declaration}
+    \input{declaration}
+    
+    \chapter*{Abstract}
+    \input{abstract}
+    
+    \tableofcontents
+    \pagenumbering{gobble}
+    
+    \chapter{Background}
+    \pagenumbering{arabic}
+    \input{chapters/background}
+    
+    \chapter{Context Survey}
+    \input{chapters/context-survey}
+    
+    \chapter{The gem5 simulator}
+    \input{chapters/the-gem5-simulator}
+    
+    \chapter{Problems Encountered}
+    \input{chapters/problems-encountered}
+    
+    \chapter{Experiments}\label{ch:experiments}
+    \input{chapters/experiments}
+    
+    \chapter{Results}
+    \input{chapters/results}
+    
+    \chapter{Conclusion}
+    \input{chapters/conclusion}
+    
+    \chapter*{Acknowledgements}
+    \input{acknowledgements}
+    
+    \printbibliography
+    
+    \appendix
+    
+    \chapter{Attempts to find power model stats}\label{ch:power-model-eldritch}
+    \input{appendices/power-model-eldritchness}
+    
+    \chapter{Ethics}
+    \includepdf{appendices/Preliminary-Ethics-form}
+\end{document}

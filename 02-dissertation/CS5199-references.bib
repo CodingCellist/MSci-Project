@@ -1,0 +1,638 @@
+
+@inproceedings{jibaja_portable_2016,
+	location = {Barcelona, Spain},
+	title = {Portable performance on asymmetric multicore processors},
+	isbn = {978-1-4503-3778-6},
+	url = {http://dl.acm.org/citation.cfm?doid=2854038.2854047},
+	doi = {10.1145/2854038.2854047},
+	abstract = {Static and dynamic power constraints are steering chip manufacturers to build single-{ISA} Asymmetric Multicore Processors ({AMPs}) with big and small cores. To deliver on their energy efﬁciency potential, schedulers must consider core sensitivity, load balance, and the critical path. Applying these criteria effectively is challenging especially for complex and non-scalable multithreaded applications. We demonstrate that runtimes for managed languages, which are now ubiquitous, provide a unique opportunity to abstract over {AMP} complexity and inform scheduling with rich semantics such as thread priorities, locks, and parallelism—information not directly available to the hardware, {OS}, or application.},
+	eventtitle = {the 2016 International Symposium},
+	pages = {24--35},
+	booktitle = {Proceedings of the 2016 International Symposium on Code Generation and Optimization - {CGO} 2016},
+	publisher = {{ACM} Press},
+	author = {Jibaja, Ivan and Cao, Ting and Blackburn, Stephen M. and {McKinley}, Kathryn S.},
+	date = {2016},
+	langid = {english},
+	file = {Jibaja et al. - 2016 - Portable performance on asymmetric multicore proce.pdf:/home/thomas/Zotero/storage/2NNAN42Z/Jibaja et al. - 2016 - Portable performance on asymmetric multicore proce.pdf:application/pdf}
+}
+
+@inproceedings{walker_thermally-aware_2016,
+	location = {Bremen, Germany},
+	title = {Thermally-aware composite run-time {CPU} power models},
+	isbn = {978-1-5090-0733-2},
+	url = {http://ieeexplore.ieee.org/document/7833420/},
+	doi = {10.1109/PATMOS.2016.7833420},
+	eventtitle = {2016 26th International Workshop on Power and Timing Modeling, Optimization and Simulation ({PATMOS})},
+	pages = {17--24},
+	booktitle = {2016 26th International Workshop on Power and Timing Modeling, Optimization and Simulation ({PATMOS})},
+	publisher = {{IEEE}},
+	author = {Walker, Matthew J. and Diestelhorst, Stephan and Hansson, Andreas and Balsamo, Domenico and Merrett, Geoff V. and Al-Hashimi, Bashir M.},
+	date = {2016-09},
+	file = {Accepted Version:/home/thomas/Zotero/storage/J54HG97R/Walker et al. - 2016 - Thermally-aware composite run-time CPU power model.pdf:application/pdf}
+}
+
+@article{walker_accurate_2017,
+	title = {Accurate and Stable Run-Time Power Modeling for Mobile and Embedded {CPUs}},
+	volume = {36},
+	issn = {0278-0070, 1937-4151},
+	url = {http://ieeexplore.ieee.org/document/7464834/},
+	doi = {10.1109/TCAD.2016.2562920},
+	abstract = {Modern mobile and embedded devices are required to be increasingly energy-efﬁcient while running more sophisticated tasks, causing the {CPU} design to become more complex and employ more energy-saving techniques. This has created a greater need for fast and accurate power estimation frameworks for both run-time {CPU} energy management and design-space exploration. We present a statistically rigorous and novel methodology for building accurate run-time power models using performance monitoring counters ({PMCs}) for mobile and embedded devices, and demonstrate how our models make more efﬁcient use of limited training data and better adapt to unseen scenarios by uniquely considering stability. Our robust model formulation reduces multicollinearity, allows separation of static and dynamic power, and allows a 100× reduction in experiment time while sacriﬁcing only 0.6\% accuracy. We present a statistically detailed evaluation of our model, highlighting and addressing the problem of heteroscedasticity in power modeling. We present software implementing our methodology and build power models for {ARM} Cortex-A7 and Cortex-A15 {CPUs}, with 3.8\% and 2.8\% average error, respectively. We model the behavior of the nonideal {CPU} voltage regulator under dynamic {CPU} activity to improve modeling accuracy by up to 5.5\% in situations where the voltage cannot be measured. To address the lack of research utilizing {PMC} data from real mobile devices, we also present our data acquisition method and experimental platform software. We support this paper with online resources including software tools, documentation, raw data and further results.},
+	pages = {106--119},
+	number = {1},
+	journaltitle = {{IEEE} Transactions on Computer-Aided Design of Integrated Circuits and Systems},
+	shortjournal = {{IEEE} Trans. Comput.-Aided Des. Integr. Circuits Syst.},
+	author = {Walker, Matthew J. and Diestelhorst, Stephan and Hansson, Andreas and Das, Anup K. and Yang, Sheng and Al-Hashimi, Bashir M. and Merrett, Geoff V.},
+	date = {2017-01},
+	langid = {english},
+	file = {Walker et al. - 2017 - Accurate and Stable Run-Time Power Modeling for Mo.pdf:/home/thomas/Zotero/storage/5AIR4CQF/Walker et al. - 2017 - Accurate and Stable Run-Time Power Modeling for Mo.pdf:application/pdf}
+}
+
+@inproceedings{walker_hardware-validated_2018,
+	location = {Belfast},
+	title = {Hardware-Validated {CPU} Performance and Energy Modelling},
+	isbn = {978-1-5386-5010-3},
+	url = {https://ieeexplore.ieee.org/document/8366934/},
+	doi = {10.1109/ISPASS.2018.00013},
+	abstract = {Full-system simulation frameworks such as gem5 are used extensively to evaluate research ideas and for designspace exploration. Moreover, energy-efﬁciency has become the key design constraint in recent years and many works use a separate power modelling framework to evaluate energy consumption. While such tools are convenient and ﬂexible, they are known to contain sources of error which are often not fully understood and potentially impact the conclusions drawn from investigations. This work enables accurate, hardware-validated performance, power, and energy modelling of {CPUs} by ﬁrst presenting a methodology to evaluate and identify sources of error in {CPU} performance models, and secondly developing empirical power models optimised for use with such performance models. Hierarchical clustering, correlation analysis, and regression techniques are used to identify sources of error without requiring detailed {CPU} speciﬁcations and enable existing models to be improved, new models to be developed, validation of simulator changes, and testing of model suitability for speciﬁc use-cases. Furthermore, the {GemStone} open-source software tool is presented, which automates the process of characterising hardware platforms, identifying sources of error in gem5 models, applying power analysis, and quantifying the effect of errors on the performance, power, and energy estimations. In addition, the mean percentage error in execution time was found to swing from −51\% to +10\% between two versions of the same gem5 model, underlining the need for an automated tool to validate models against reference hardware, ensuring accuracy and consistency.},
+	eventtitle = {2018 {IEEE} International Symposium on Performance Analysis of Systems and Software ({ISPASS})},
+	pages = {44--53},
+	booktitle = {2018 {IEEE} International Symposium on Performance Analysis of Systems and Software ({ISPASS})},
+	publisher = {{IEEE}},
+	author = {Walker, Matthew and Bischoff, Sascha and Diestelhorst, Stephan and Merrett, Geoff and Al-Hashimi, Bashir},
+	date = {2018-04},
+	langid = {english},
+	file = {Walker et al. - 2018 - Hardware-Validated CPU Performance and Energy Mode.pdf:/home/thomas/Zotero/storage/6IPAJDNJ/Walker et al. - 2018 - Hardware-Validated CPU Performance and Energy Mode.pdf:application/pdf}
+}
+
+@article{tousi_arm_2017,
+	title = {Arm Research Starter Kit: System Modeling  using gem5},
+	url = {https://github.com/arm-university/arm-gem5-rsk},
+	pages = {32},
+	author = {Tousi, Ashkan and Zhu, Chuan},
+	date = {2017},
+	langid = {english},
+	file = {Tousi and Zhu - 2017 - Arm Research Starter Kit System Modeling  using g.pdf:/home/thomas/Zotero/storage/GJL3IRXV/Tousi and Zhu - 2017 - Arm Research Starter Kit System Modeling  using g.pdf:application/pdf}
+}
+
+@inproceedings{reddy_empirical_2017,
+	location = {Thessaloniki},
+	title = {Empirical {CPU} power modelling and estimation in the gem5 simulator},
+	isbn = {978-1-5090-6462-5},
+	url = {http://ieeexplore.ieee.org/document/8106988/},
+	doi = {10.1109/PATMOS.2017.8106988},
+	abstract = {Power modelling is important for modern {CPUs} to inform power management approaches and allow design space exploration. Power simulators, combined with a full-system architectural simulator such as gem5, enable power-performance trade-offs to be investigated early in the design of a system with different conﬁgurations (e.g number of cores, cache size, etc.). However, the accuracy of existing power simulators, such as {McPAT}, is known to be low due to the abstraction and speciﬁcation errors, and this can lead to incorrect research conclusions. In this paper, we present an accurate power model, built from measured data, integrated into gem5 for estimating the power consumption of a simulated quad-core {ARM} {CortexA}15. A power modelling methodology based on Performance Monitoring Counters ({PMCs}) is used to build and evaluate the integrated model in gem5. We ﬁrst validate this methodology on the real hardware with 60 workloads at nine Dynamic Voltage and Frequency Scaling ({DVFS}) levels and four core mappings (2,160 samples), showing an average error between estimated and real measured power of less than 6\%. Correlation between gem5 activity statistics and hardware {PMCs} is investigated to build a gem5 model representing a quad-core {ARM} Cortex-A15. Experimental validation with 15 workloads at four {DVFS} levels on real hardware and gem5 has been conducted to understand how the difference between the gem5 simulated activity statistics and the hardware {PMCs} affects the estimated power consumption.},
+	eventtitle = {2017 27th International Symposium on Power and Timing Modeling, Optimization and Simulation ({PATMOS})},
+	pages = {1--8},
+	booktitle = {2017 27th International Symposium on Power and Timing Modeling, Optimization and Simulation ({PATMOS})},
+	publisher = {{IEEE}},
+	author = {Reddy, Basireddy Karunakar and Walker, Matthew J. and Balsamo, Domenico and Diestelhorst, Stephan and Al-Hashimi, Bashir M. and Merrett, Geoff V.},
+	date = {2017-09},
+	langid = {english},
+	file = {Reddy et al. - 2017 - Empirical CPU power modelling and estimation in th.pdf:/home/thomas/Zotero/storage/CKZZ9IPW/Reddy et al. - 2017 - Empirical CPU power modelling and estimation in th.pdf:application/pdf}
+}
+
+@thesis{basireddy_runtime_2019,
+	title = {Runtime Energy Management of Concurrent Applications for Multi-core Platforms},
+	url = {https://eprints.soton.ac.uk/433546/},
+	abstract = {Multi-core platforms are employing a greater number of heterogeneous cores and resource configurations to achieve energy-efficiency and high performance. These platforms often execute applications with different performance constraints concurrently, which contend for resources simultaneously, thereby generating varying workload and resources demands over time. There is a little reported work on runtime energy management of concurrent execution, focusing mostly on homogeneous multi-cores and limited application scenarios. This thesis considers both homogeneous and heterogeneous multi-cores and broadens application scenarios. The following contributions are made in this thesis. {\textless}br/{\textgreater}{\textless}br/{\textgreater}Firstly, this thesis presents online Dynamic Voltage and Frequency Scaling ({DVFS}) techniques for concurrent execution of single-threaded and multi-threaded applications on homogeneous multi-cores. This includes an experimental analysis and deriving metrics for efficient online workload classification. The {DVFS} level is proactively set through predicted workload, measured through Memory Reads Per Instruction. The analysis also considers thread synchronisation overheads, and underlying memory and {DVFS} architectures. Average energy savings of up to 60\% are observed when evaluated on three different hardware platforms (Odroid-{XU}3, Intel Xeon E5-2630, and Xeon Phi 7620P). {\textless}br/{\textgreater}{\textless}br/{\textgreater}Next, an energy efficient static mapping and {DVFS} approach is proposed for heterogeneous multi-core {CPUs}. This approach simultaneously exploits different types of cores for each application in a concurrent execution scenario. It first selects performance meeting mapping (no. of cores and type) for each application having minimum energy consumption using offline results. Then online {DVFS} is applied to adapt to workload and performance variations. Compared to recent techniques, the proposed approach has an average of 33\% lower energy consumption when validated on the Odroid-{XU}3. {\textless}br/{\textgreater}{\textless}br/{\textgreater}To eliminate dependency on the offline application profiling and to adapt to dynamic application arrival/completion, an adaptive mapping approach coupled with {DVFS} is presented. This is achieved through an accurate performance model, and an energy efficient resource selection technique and a resource manager. Experimental evaluation on the Odroid-{XU}3 shows an improvement of up to 28\% in energy efficiency and 7.9\% better prediction accuracy by performance models.{\textless}br/{\textgreater}},
+	pagetotal = {202},
+	institution = {University of Southampton},
+	type = {Doctoral},
+	author = {Basireddy, Karunakar Reddy},
+	date = {2019-04},
+	langid = {english},
+	file = {Basireddy - Runtime Energy Management of Concurrent Applicatio.pdf:/home/thomas/Zotero/storage/3SFVQCJ7/Basireddy - Runtime Energy Management of Concurrent Applicatio.pdf:application/pdf}
+}
+
+@inproceedings{yu_colab_2020,
+	location = {San Diego {CA} {USA}},
+	title = {{COLAB}: a collaborative multi-factor scheduler for asymmetric multicore processors},
+	isbn = {978-1-4503-7047-9},
+	url = {https://dl.acm.org/doi/10.1145/3368826.3377915},
+	doi = {10.1145/3368826.3377915},
+	shorttitle = {{COLAB}},
+	abstract = {Increasingly prevalent asymmetric multicore processors ({AMP}) are necessary for delivering performance in the era of limited power budget and dark silicon. However, the software fails to use them efficiently. {OS} schedulers, in particular, handle asymmetry only under restricted scenarios. We have efficient symmetric schedulers, efficient asymmetric schedulers for single-threaded workloads, and efficient asymmetric schedulers for single program workloads. What we do not have is a scheduler that can handle all runtime factors affecting {AMP} for multi-threaded multi-programmed workloads.},
+	eventtitle = {{CGO} '20: 18th {ACM}/{IEEE} International Symposium on Code Generation and Optimization},
+	pages = {268--279},
+	booktitle = {Proceedings of the 18th {ACM}/{IEEE} International Symposium on Code Generation and Optimization},
+	publisher = {{ACM}},
+	author = {Yu, Teng and Petoumenos, Pavlos and Janjic, Vladimir and Leather, Hugh and Thomson, John},
+	date = {2020-02-22},
+	langid = {english},
+	file = {Yu et al. - 2020 - COLAB a collaborative multi-factor scheduler for .pdf:/home/thomas/Zotero/storage/XM7JVXMQ/Yu et al. - 2020 - COLAB a collaborative multi-factor scheduler for .pdf:application/pdf}
+}
+
+@inproceedings{sakalis_splash-3_2016,
+	location = {Uppsala, Sweden},
+	title = {Splash-3: A properly synchronized benchmark suite for contemporary research},
+	isbn = {978-1-5090-1953-3},
+	url = {http://ieeexplore.ieee.org/document/7482078/},
+	doi = {10.1109/ISPASS.2016.7482078},
+	shorttitle = {Splash-3},
+	abstract = {Benchmarks are indispensable in evaluating the performance implications of new research ideas. However, their usefulness is compromised if they do not work correctly on a system under evaluation or, in general, if they cannot be used consistently to compare different systems.},
+	eventtitle = {2016 {IEEE} International Symposium on Performance Analysis of Systems and Software ({ISPASS})},
+	pages = {101--111},
+	booktitle = {2016 {IEEE} International Symposium on Performance Analysis of Systems and Software ({ISPASS})},
+	publisher = {{IEEE}},
+	author = {Sakalis, Christos and Leonardsson, Carl and Kaxiras, Stefanos and Ros, Alberto},
+	date = {2016-04},
+	langid = {english},
+	file = {Sakalis et al. - 2016 - Splash-3 A properly synchronized benchmark suite .pdf:/home/thomas/Zotero/storage/EEAR4LCU/Sakalis et al. - 2016 - Splash-3 A properly synchronized benchmark suite .pdf:application/pdf}
+}
+
+@online{noauthor_gnu_2019,
+	title = {{GNU} Toolchain {\textbar} {GNU}-A Downloads},
+	url = {https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads},
+	abstract = {Download the The {GNU} Toolchain for the Cortex-A Family are integrated and validated packages featuring the {GCC} compiler, libraries and other {GNU} tools necessary for software development on devices based on the Arm Cortex-A processors or the Arm A-profile architecture.},
+	titleaddon = {{ARM} Developer},
+	date = {2019-12-19},
+	langid = {english},
+	file = {Snapshot:/home/thomas/Zotero/storage/YHN26UHL/downloads.html:text/html}
+}
+
+@online{noauthor_cfs_nodate,
+	title = {{CFS} Scheduler — The Linux Kernel documentation},
+	url = {https://www.kernel.org/doc/html/latest/scheduler/sched-design-CFS.html},
+	file = {CFS Scheduler — The Linux Kernel documentation:/home/thomas/Zotero/storage/QF2HAY7H/sched-design-CFS.html:text/html}
+}
+
+@book{silberschatz_operating_2014,
+	location = {Hoboken, {NJ}},
+	edition = {9. ed., internat. student version},
+	title = {Operating system concepts},
+	isbn = {978-1-118-09375-7},
+	pagetotal = {829},
+	publisher = {Wiley},
+	author = {Silberschatz, Abraham and Galvin, Peter B. and Gagne, Greg},
+	date = {2014},
+	note = {{OCLC}: 854717328}
+}
+
+@inproceedings{scordino_energy-aware_2018,
+	location = {Pau, France},
+	title = {Energy-aware real-time scheduling in the linux kernel},
+	isbn = {978-1-4503-5191-1},
+	url = {http://dl.acm.org/citation.cfm?doid=3167132.3167198},
+	doi = {10.1145/3167132.3167198},
+	abstract = {The recent changes made in the Linux kernel aim at achieving better energy e ciency through a tighter integration between the {CPU} scheduler and the frequency-scaling subsystem. However, in the current implementation, the frequency scaling mechanism is used only when there are no real-time tasks in execution. This paper shows how the deadline scheduler and the cpufreq subsystem can be extended to relax this constraint and implement an energyaware real-time scheduling algorithm. In particular, we describe the design issues encountered when implementing the {GRUB}-{PA} algorithm on a real operating system like Linux. A set of experimental results on a multi-core {ARM} platform validate the e ectiveness of the proposed implementation.},
+	eventtitle = {the 33rd Annual {ACM} Symposium},
+	pages = {601--608},
+	booktitle = {Proceedings of the 33rd Annual {ACM} Symposium on Applied Computing  - {SAC} '18},
+	publisher = {{ACM} Press},
+	author = {Scordino, Claudio and Abeni, Luca and Lelli, Juri},
+	date = {2018},
+	langid = {english},
+	file = {Scordino et al. - 2018 - Energy-aware real-time scheduling in the linux ker.pdf:/home/thomas/Zotero/storage/FBAJIRS7/Scordino et al. - 2018 - Energy-aware real-time scheduling in the linux ker.pdf:application/pdf}
+}
+
+@inproceedings{reddy_online_2018,
+	location = {Dresden, Germany},
+	title = {Online concurrent workload classification for multi-core energy management},
+	isbn = {978-3-9819263-0-9},
+	url = {http://ieeexplore.ieee.org/document/8342084/},
+	doi = {10.23919/DATE.2018.8342084},
+	abstract = {Modern embedded multi-core processors are organized as clusters of cores, where all cores in each cluster operate at a common Voltage-frequency (V-f ). Such processors often need to execute applications concurrently, exhibiting varying and mixed workloads (e.g. compute- and memory-intensive) depending on the instruction mix and resource sharing. Runtime adaptation is key to achieving energy savings without tradingoff application performance with such workload variabilities. In this paper, we propose an online energy management technique that performs concurrent workload classiﬁcation using the metric Memory Reads Per Instruction ({MRPI}) and pro-actively selects an appropriate V-f setting through workload prediction. Subsequently, it monitors the workload prediction error and performance loss, quantiﬁed by Instructions Per Second ({IPS}) at runtime and adjusts the chosen V-f to compensate. We validate the proposed technique on an Odroid-{XU}3 with various combinations of benchmark applications. Results show an improvement in energy efﬁciency of up to 69\% compared to existing approaches.},
+	eventtitle = {2018 Design, Automation \& Test in Europe Conference \& Exhibition ({DATE})},
+	pages = {621--624},
+	booktitle = {2018 Design, Automation \& Test in Europe Conference \& Exhibition ({DATE})},
+	publisher = {{IEEE}},
+	author = {Reddy, Basireddy Karunakar and Merrett, Geoff V. and Al-Hashimi, Bashir M. and Singh, Amit Kumar},
+	date = {2018-03},
+	langid = {english},
+	file = {Reddy et al. - 2018 - Online concurrent workload classification for mult.pdf:/home/thomas/Zotero/storage/UY2QXGQA/Reddy et al. - 2018 - Online concurrent workload classification for mult.pdf:application/pdf}
+}
+
+@article{basireddy_adamd_2019,
+	title = {{AdaMD}: Adaptive Mapping and {DVFS} for Energy-efficient Heterogeneous Multi-cores},
+	issn = {0278-0070, 1937-4151},
+	url = {https://ieeexplore.ieee.org/document/8796426/},
+	doi = {10.1109/TCAD.2019.2935065},
+	shorttitle = {{AdaMD}},
+	abstract = {Modern heterogeneous multi-core systems, containing various types of cores, are increasingly dealing with concurrent execution of dynamic application workloads. Moreover, the performance constraints of each application vary, and applications enter/exit the system at any time. Existing approaches are not efﬁcient in such dynamic scenarios, especially if applications are unknown, as they require extensive ofﬂine application analysis and do not consider the runtime execution scenarios (application arrival/completion, and workload and performance variations) for runtime management. To address this, we present {AdaMD}, an adaptive mapping and dynamic voltage and frequency scaling ({DVFS}) approach for improving energy consumption and performance. The key feature of the proposed approach is the elimination of dependency on ofﬂine proﬁled results while making runtime decisions. This is achieved through a performance prediction model having a maximum error of 7.9\% lower than the previously reported model and a mapping approach that allocates processing cores to applications while respecting performance constraints. Furthermore, {AdaMD} adapts to runtime execution scenarios efﬁciently by monitoring the application status, and performance/workload variations to adjust the previous {DVFS} settings and threadto-core mappings. The proposed approach is experimentally validated on the Odroid-{XU}3, with various combinations of diverse multi-threaded applications from {PARSEC} and {SPLASH} benchmarks. Results show energy savings of up to 28\% compared to the recently proposed approach while meeting performance constraints.},
+	pages = {1--1},
+	journaltitle = {{IEEE} Transactions on Computer-Aided Design of Integrated Circuits and Systems},
+	shortjournal = {{IEEE} Trans. Comput.-Aided Des. Integr. Circuits Syst.},
+	author = {Basireddy, Karunakar R. and Singh, Amit Kumar and Al-Hashimi, Bashir M. and Merrett, Geoff V.},
+	date = {2019},
+	langid = {english},
+	file = {Basireddy et al. - 2019 - AdaMD Adaptive Mapping and DVFS for Energy-effici.pdf:/home/thomas/Zotero/storage/WUBHDZB3/Basireddy et al. - 2019 - AdaMD Adaptive Mapping and DVFS for Energy-effici.pdf:application/pdf}
+}
+
+@book{kleinrock_computer_1976,
+	location = {New York, {NY}},
+	title = {Computer applications},
+	isbn = {978-0-471-49111-8},
+	series = {Queueing Systems},
+	pagetotal = {549},
+	number = {Leonard Kleinrock; Richard Gail ; Vol. 2},
+	publisher = {Wiley},
+	author = {Kleinrock, Leonard and Gail, Richard and Kleinrock, Leonard},
+	date = {1976},
+	note = {{OCLC}: 299649623},
+	file = {Table of Contents PDF:/home/thomas/Zotero/storage/5FYEBHL2/Kleinrock et al. - 1976 - Computer applications.pdf:application/pdf}
+}
+
+@inproceedings{guibas_dichromatic_1978,
+	location = {Ann Arbor, {MI}, {USA}},
+	title = {A dichromatic framework for balanced trees},
+	url = {http://ieeexplore.ieee.org/document/4567957/},
+	doi = {10.1109/SFCS.1978.3},
+	eventtitle = {19th Annual Symposium on Foundations of Computer Science (sfcs 1978)},
+	pages = {8--21},
+	booktitle = {19th Annual Symposium on Foundations of Computer Science (sfcs 1978)},
+	publisher = {{IEEE}},
+	author = {Guibas, Leo J. and Sedgewick, Robert},
+	date = {1978-10},
+	langid = {english},
+	file = {Guibas and Sedgewick - 1978 - A dichromatic framework for balanced trees.pdf:/home/thomas/Zotero/storage/3PVDY27Q/Guibas and Sedgewick - 1978 - A dichromatic framework for balanced trees.pdf:application/pdf}
+}
+
+@article{corbato_experimental_1962,
+	title = {An Experimental Time-Sharing System},
+	doi = {10.1145/1460833.1460871},
+	series = {{AIEE}-{IRE} ’62 (Spring)},
+	abstract = {It is the purpose of this paper to discuss briefly the need for time-sharing, some of the implementation problems, an experimental timesharing system which has been developed for the contemporary {IBM} 7090, and finally a scheduling algorithm of one of us ({FJC}) that illustrates some of the techniques which may be employed to enhance and be analyzed for the performance limits of such a time-sharing system.},
+	pages = {10},
+	journaltitle = {Proceedings of the May 1-3, 1962, Spring Joint Computer Conference},
+	author = {Corbató, Fernando J and Merwin-Daggett, Marjorie and Daley, Robert C},
+	date = {1962-05},
+	langid = {english},
+	file = {Corbatcf et al. - AN EXPERIMENTAL TIME-SHARING SYSTEM.pdf:/home/thomas/Zotero/storage/5IFVP5GF/Corbatcf et al. - AN EXPERIMENTAL TIME-SHARING SYSTEM.pdf:application/pdf}
+}
+
+@article{quan_hybrid_2015,
+	title = {A Hybrid Task Mapping Algorithm for Heterogeneous {MPSoCs}},
+	volume = {14},
+	issn = {15399087},
+	url = {http://dl.acm.org/citation.cfm?doid=2724585.2680542},
+	doi = {10.1145/2680542},
+	pages = {1--25},
+	number = {1},
+	journaltitle = {{ACM} Transactions on Embedded Computing Systems},
+	shortjournal = {{ACM} Trans. Embed. Comput. Syst.},
+	author = {Quan, Wei and Pimentel, Andy D.},
+	date = {2015-01-21},
+	langid = {english},
+	file = {Quan and Pimentel - 2015 - A Hybrid Task Mapping Algorithm for Heterogeneous .pdf:/home/thomas/Zotero/storage/HH8BQRNT/Quan and Pimentel - 2015 - A Hybrid Task Mapping Algorithm for Heterogeneous .pdf:application/pdf}
+}
+
+@article{noauthor_arm_2016,
+	title = {Arm Cortex-A53 {MPCore} Processor Technical Reference Manual},
+	url = {http://infocenter.arm.com/help/topic/com.arm.doc.ddi0500j/DDI0500J_cortex_a53_trm.pdf},
+	pages = {12--1},
+	date = {2016},
+	langid = {english},
+	file = {2016 - Arm Cortex-A53 MPCore Processor Technical Referenc.pdf:/home/thomas/Zotero/storage/SMZS8NKG/2016 - Arm Cortex-A53 MPCore Processor Technical Referenc.pdf:application/pdf}
+}
+
+@article{noauthor_arm_2015,
+	title = {Arm® Cortex®‑A73 {MPCore} Processor Technical Reference Manual},
+	url = {http://infocenter.arm.com/help/topic/com.arm.doc.100048_0100_06_en/cortex_a73_trm_100048_0100_06_en.pdf},
+	pages = {11--442},
+	date = {2015},
+	langid = {english},
+	file = {2015 - Arm® Cortex®‑A73 MPCore Processor Technical Refere.pdf:/home/thomas/Zotero/storage/MW82E3JX/2015 - Arm® Cortex®‑A73 MPCore Processor Technical Refere.pdf:application/pdf}
+}
+
+@online{sun_how_nodate,
+	title = {How to Use Performance Monitor Unit({PMU}) of 64-bit {ARMv}8-A in Linux},
+	url = {https://zhiyisun.github.io/2016/03/02/How-to-Use-Performance-Monitor-Unit-(PMU)-of-64-bit-ARMv8-A-in-Linux.html},
+	type = {Blog},
+	author = {Sun, Zhiyi},
+	file = {How to Use Performance Monitor Unit(PMU) of 64-bit ARMv8-A in Linux:/home/thomas/Zotero/storage/UVF3JJHU/How-to-Use-Performance-Monitor-Unit-(PMU)-of-64-bit-ARMv8-A-in-Linux.html:text/html}
+}
+
+@article{binkert_gem5_2011,
+	title = {The gem5 simulator},
+	volume = {39},
+	issn = {0163-5964},
+	url = {https://dl.acm.org/doi/10.1145/2024716.2024718},
+	doi = {10.1145/2024716.2024718},
+	abstract = {The gem5 simulation infrastructure is the merger of the best aspects of the M5 [4] and {GEMS} [9] simulators. M5 provides a highly conﬁgurable simulation framework, multiple {ISAs}, and diverse {CPU} models. {GEMS} complements these features with a detailed and ﬂexible memory system, including support for multiple cache coherence protocols and interconnect models. Currently, gem5 supports most commercial {ISAs} ({ARM}, {ALPHA}, {MIPS}, Power, {SPARC}, and x86), including booting Linux on three of them ({ARM}, {ALPHA}, and x86).},
+	pages = {1--7},
+	number = {2},
+	journaltitle = {{ACM} {SIGARCH} Computer Architecture News},
+	shortjournal = {{SIGARCH} Comput. Archit. News},
+	author = {Binkert, Nathan and Beckmann, Bradford and Black, Gabriel and Reinhardt, Steven K. and Saidi, Ali and Basu, Arkaprava and Hestness, Joel and Hower, Derek R. and Krishna, Tushar and Sardashti, Somayeh and Sen, Rathijit and Sewell, Korey and Shoaib, Muhammad and Vaish, Nilay and Hill, Mark D. and Wood, David A.},
+	date = {2011-05-31},
+	langid = {english},
+	file = {Binkert et al. - 2011 - The gem5 simulator.pdf:/home/thomas/Zotero/storage/C7D8A56A/Binkert et al. - 2011 - The gem5 simulator.pdf:application/pdf}
+}
+
+@inproceedings{spiliopoulos_introducing_2013,
+	location = {San Francisco, {CA}, {USA}},
+	title = {Introducing {DVFS}-Management in a Full-System Simulator},
+	isbn = {978-0-7695-5102-9},
+	url = {http://ieeexplore.ieee.org/document/6730810/},
+	doi = {10.1109/MASCOTS.2013.75},
+	abstract = {Dynamic Voltage and Frequency Scaling ({DVFS}) is an essential part of controlling the power consumption of any computer system, ranging from mobile phones to servers. {DVFS} efﬁciency relies on hardware-software co-optimization, thus using existing hardware cannot reveal the full optimization potential beyond the current implementation’s characteristics.},
+	eventtitle = {2013 {IEEE} 21st International Symposium on Modelling, Analysis \& Simulation of Computer and Telecommunication Systems ({MASCOTS})},
+	pages = {535--545},
+	booktitle = {2013 {IEEE} 21st International Symposium on Modelling, Analysis and Simulation of Computer and Telecommunication Systems},
+	publisher = {{IEEE}},
+	author = {Spiliopoulos, Vasileios and Bagdia, Akash and Hansson, Andreas and Aldworth, Peter and Kaxiras, Stefanos},
+	date = {2013-08},
+	langid = {english},
+	file = {Spiliopoulos et al. - 2013 - Introducing DVFS-Management in a Full-System Simul.pdf:/home/thomas/Zotero/storage/R4U4FAAP/Spiliopoulos et al. - 2013 - Introducing DVFS-Management in a Full-System Simul.pdf:application/pdf}
+}
+
+@online{girdwood_linux_nodate,
+	title = {Linux voltage and current regulator framework — The Linux Kernel documentation},
+	url = {https://www.kernel.org/doc/html/latest/power/regulator/overview.html},
+	author = {Girdwood, Liam},
+	file = {Linux voltage and current regulator framework — The Linux Kernel documentation:/home/thomas/Zotero/storage/G3DQRVBU/overview.html:text/html}
+}
+
+@online{noauthor_gem5_nodate,
+	title = {gem5: About},
+	url = {http://www.gem5.org/about/},
+	file = {gem5\: About:/home/thomas/Zotero/storage/UNE5HVMC/about.html:text/html}
+}
+
+@online{noauthor_gem5_nodate-1,
+	title = {gem5: Power and Thermal Model},
+	url = {https://www.gem5.org/documentation/general_docs/thermal_model},
+	file = {gem5\: Power and Thermal Model:/home/thomas/Zotero/storage/4E4VMXPE/thermal_model.html:text/html}
+}
+
+@online{noauthor_getting_2019,
+	title = {Getting Started - Sniper},
+	url = {http://snipersim.org/w/Getting_Started},
+	date = {2019-02-17},
+	file = {Getting Started - Sniper:/home/thomas/Zotero/storage/ZMNAAS89/Getting_Started.html:text/html;Getting Started - Sniper:/home/thomas/Zotero/storage/U77NGPQL/Getting_Started.html:text/html}
+}
+
+@video{bischoff_gem5_2017,
+	title = {gem5: Empowering the Masses},
+	url = {https://www.youtube.com/watch?v=3gWyUWHxVj4},
+	shorttitle = {gem5},
+	abstract = {Presented by Sascha Bischoff, Arm at the Arm Research Summit 2017.},
+	author = {Bischoff, Sascha},
+	date = {2017}
+}
+
+@unpublished{bischoff_gem5_2017-1,
+	title = {gem5: empowering the masses},
+	url = {http://old.gem5.org/wiki/images/b/bf/Summit2017_powerframework.pdf},
+	note = {{ARM} Research Summit},
+	author = {Bischoff, Sascha},
+	date = {2017},
+	langid = {english},
+	file = {Bischoff - gem5 empowering the masses.pdf:/home/thomas/Zotero/storage/BD8WHBSU/Bischoff - gem5 empowering the masses.pdf:application/pdf}
+}
+
+@online{wysocki_cpu_nodate,
+	title = {{CPU} Performance Scaling — The Linux Kernel documentation},
+	url = {https://www.kernel.org/doc/html/latest/admin-guide/pm/cpufreq.html},
+	author = {Wysocki, Rafael J.},
+	file = {CPU Performance Scaling — The Linux Kernel documentation:/home/thomas/Zotero/storage/SGZGSW6P/cpufreq.html:text/html}
+}
+
+@article{liu_scheduling_1973,
+	title = {Scheduling Algorithms for Multiprogramming in a Hard- Real-Time Environment},
+	volume = {20},
+	doi = {10.1145/321738.321743},
+	pages = {16},
+	number = {1},
+	journaltitle = {J. {ACM}},
+	shortjournal = {J. {ACM}},
+	author = {Liu, C L},
+	date = {1973-01},
+	langid = {english},
+	file = {Liu - Scheduling Algorithms for Multiprogramming in a Ha.pdf:/home/thomas/Zotero/storage/MC94UFN6/Liu - Scheduling Algorithms for Multiprogramming in a Ha.pdf:application/pdf}
+}
+
+@inproceedings{wonyoung_kim_system_2008,
+	location = {Salt Lake City, {UT}, {USA}},
+	title = {System level analysis of fast, per-core {DVFS} using on-chip switching regulators},
+	isbn = {978-1-4244-2070-4},
+	url = {http://ieeexplore.ieee.org/document/4658633/},
+	doi = {10.1109/HPCA.2008.4658633},
+	abstract = {Portable, embedded systems place ever-increasing demands on high-performance, low-power microprocessor design. Dynamic voltage and frequency scaling ({DVFS}) is a well-known technique to reduce energy in digital systems, but the effectiveness of {DVFS} is hampered by slow voltage transitions that occur on the order of tens of microseconds. In addition, the recent trend towards chipmultiprocessors ({CMP}) executing multi-threaded workloads with heterogeneous behavior motivates the need for per-core {DVFS} control mechanisms. Voltage regulators that are integrated onto the same chip as the microprocessor core provide the beneﬁt of both nanosecond-scale voltage switching and per-core voltage control. We show that these characteristics provide signiﬁcant energy-saving opportunities compared to traditional off-chip regulators. However, the implementation of on-chip regulators presents many challenges including regulator efﬁciency and output voltage transient characteristics, which are signiﬁcantly impacted by the system-level application of the regulator. In this paper, we describe and model these costs, and perform a comprehensive analysis of a {CMP} system with on-chip integrated regulators. We conclude that on-chip regulators can signiﬁcantly improve {DVFS} effectiveness and lead to overall system energy savings in a {CMP}, but architects must carefully account for overheads and costs when designing next-generation {DVFS} systems and algorithms.},
+	eventtitle = {2008 {IEEE} 14th International Symposium on High Performance Computer Architecture ({HPCA})},
+	pages = {123--134},
+	booktitle = {2008 {IEEE} 14th International Symposium on High Performance Computer Architecture},
+	publisher = {{IEEE}},
+	author = {{Wonyoung Kim} and Gupta, Meeta S. and Wei, Gu-Yeon and Brooks, David},
+	date = {2008-02},
+	langid = {english},
+	file = {Wonyoung Kim et al. - 2008 - System level analysis of fast, per-core DVFS using.pdf:/home/thomas/Zotero/storage/DY85UASH/Wonyoung Kim et al. - 2008 - System level analysis of fast, per-core DVFS using.pdf:application/pdf}
+}
+
+@inproceedings{macken_voltage_1990,
+	location = {San Francisco, {CA}, {USA}},
+	title = {A voltage reduction technique for digital systems},
+	url = {http://ieeexplore.ieee.org/document/110213/},
+	doi = {10.1109/ISSCC.1990.110213},
+	eventtitle = {1990 37th {IEEE} International Conference on Solid-State Circuits},
+	pages = {238--239},
+	booktitle = {1990 37th {IEEE} International Conference on Solid-State Circuits},
+	publisher = {{IEEE}},
+	author = {Macken, P. and Degrauwe, M. and Van Paemel, M. and Oguey, H.},
+	urldate = {2020-05-07},
+	date = {1990},
+	langid = {english},
+	file = {Macken et al. - 1990 - A voltage reduction technique for digital systems.pdf:/home/thomas/Zotero/storage/BHCETXIK/Macken et al. - 1990 - A voltage reduction technique for digital systems.pdf:application/pdf}
+}
+
+@online{noauthor_sklearnneighborskneighborsregressor_nodate,
+	title = {sklearn.neighbors.{KNeighborsRegressor} — scikit-learn 0.22.2 documentation},
+	url = {https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsRegressor.html#sklearn.neighbors.KNeighborsRegressor},
+	file = {sklearn.neighbors.KNeighborsRegressor — scikit-learn 0.22.2 documentation:/home/thomas/Zotero/storage/8H7JX786/sklearn.neighbors.KNeighborsRegressor.html:text/html}
+}
+
+@inproceedings{lozi_linux_2016,
+	location = {London, United Kingdom},
+	title = {The Linux scheduler: a decade of wasted cores},
+	isbn = {978-1-4503-4240-7},
+	url = {http://dl.acm.org/citation.cfm?doid=2901318.2901326},
+	doi = {10.1145/2901318.2901326},
+	shorttitle = {The Linux scheduler},
+	abstract = {As a central part of resource management, the {OS} thread scheduler must maintain the following, simple, invariant: make sure that ready threads are scheduled on available cores. As simple as it may seem, we found that this invariant is often broken in Linux. Cores may stay idle for seconds while ready threads are waiting in runqueues. In our experiments, these performance bugs caused many-fold performance degradation for synchronization-heavy scientiﬁc applications, 13\% higher latency for kernel make, and a 1423\% decrease in {TPC}-H throughput for a widely used commercial database. The main contribution of this work is the discovery and analysis of these bugs and providing the ﬁxes. Conventional testing techniques and debugging tools are ineffective at conﬁrming or understanding this kind of bugs, because their symptoms are often evasive. To drive our investigation, we built new tools that check for violation of the invariant online and visualize scheduling activity. They are simple, easily portable across kernel versions, and run with a negligible overhead. We believe that making these tools part of the kernel developers’ tool belt can help keep this type of bug at bay.},
+	eventtitle = {the Eleventh European Conference},
+	pages = {1--16},
+	booktitle = {Proceedings of the Eleventh European Conference on Computer Systems - {EuroSys} '16},
+	publisher = {{ACM} Press},
+	author = {Lozi, Jean-Pierre and Lepers, Baptiste and Funston, Justin and Gaud, Fabien and Quéma, Vivien and Fedorova, Alexandra},
+	date = {2016},
+	langid = {english},
+	file = {Lozi et al. - 2016 - The Linux scheduler a decade of wasted cores.pdf:/home/thomas/Zotero/storage/VSHYV75N/Lozi et al. - 2016 - The Linux scheduler a decade of wasted cores.pdf:application/pdf}
+}
+
+@online{noauthor_energy_nodate,
+	title = {Energy Aware Scheduling — The Linux Kernel documentation},
+	url = {https://www.kernel.org/doc/html/latest/scheduler/sched-energy.html#energy-aware-task-placement},
+	file = {Energy Aware Scheduling — The Linux Kernel documentation:/home/thomas/Zotero/storage/UYD3QEPH/sched-energy.html:text/html}
+}
+
+@letter{torvalds_linux_2019,
+	title = {Linux 5.0},
+	url = {https://lore.kernel.org/lkml/CAHk-=wjuG6HiGbD7DCGfvDvhr_1WZUR-eYF2qWGbYyn9k6unvg@mail.gmail.com/T/},
+	type = {E-mail},
+	author = {Torvalds, Linus},
+	date = {2019-03-04},
+	file = {Linux 5.0:/home/thomas/Zotero/storage/L3P9STMI/T.html:text/html}
+}
+
+@online{noauthor_linux_2019,
+	title = {Linux Kernel {\textbar} Energy Aware Scheduling ({EAS})},
+	url = {https://developer.arm.com/tools-and-software/open-source-software/linux-kernel/energy-aware-scheduling},
+	abstract = {Energy Aware Scheduling},
+	titleaddon = {{ARM} Developer},
+	date = {2019},
+	langid = {english},
+	file = {Snapshot:/home/thomas/Zotero/storage/8DIWW9RS/energy-aware-scheduling.html:text/html}
+}
+
+@online{noauthor_gem5_nodate-2,
+	title = {gem5: Getting Started with gem5},
+	url = {http://www.gem5.org/getting_started/},
+	file = {gem5\: Getting Started with gem5:/home/thomas/Zotero/storage/8HLTBLXY/getting_started.html:text/html}
+}
+
+@online{noauthor_sunsetting_nodate,
+	title = {Sunsetting Python 2},
+	url = {https://www.python.org/doc/sunset-python-2/},
+	abstract = {The official home of the Python Programming Language},
+	titleaddon = {Python.org},
+	langid = {english},
+	file = {Snapshot:/home/thomas/Zotero/storage/G2CTK3LS/sunset-python-2.html:text/html}
+}
+
+@software{noauthor_google_nodate,
+	title = {Google Performance Tools},
+	rights = {{BSD}-3-Clause},
+	url = {https://github.com/gperftools/gperftools},
+	shorttitle = {gperftools},
+	abstract = {Main gperftools repository. Contribute to gperftools/gperftools development by creating an account on {GitHub}.},
+	version = {2.7},
+	publisher = {gperftools},
+	note = {original-date: 2014-01-28T11:15:07Z}
+}
+
+@online{lowe-power_full_2019,
+	title = {Full system configuration files — gem5 Tutorial 0.1 documentation},
+	url = {http://learning.gem5.org/book/part5/fs_config.html},
+	titleaddon = {Learning gem5},
+	author = {Lowe-Power, Jason},
+	date = {2019},
+	file = {Full system configuration files — gem5 Tutorial 0.1 documentation:/home/thomas/Zotero/storage/WK2LWSNV/fs_config.html:text/html}
+}
+
+@online{noauthor_index_2017,
+	title = {Index of /dist/current/arm (old)},
+	url = {http://m5sim.org/dist/current/arm/},
+	date = {2017},
+	file = {Index of /dist/current/arm:/home/thomas/Zotero/storage/P7MEXXC6/arm.html:text/html}
+}
+
+@online{noauthor_index_2020,
+	title = {Index of /dist/current/arm (new)},
+	url = {http://dist.gem5.org/dist/current/arm/},
+	date = {2020},
+	file = {:/home/thomas/Zotero/storage/C6LJNXKY/arm.html:text/html}
+}
+
+@online{noauthor_busybox_nodate,
+	title = {{BusyBox}},
+	url = {https://busybox.net/},
+	file = {BusyBox:/home/thomas/Zotero/storage/U9XYS4PZ/busybox.net.html:text/html}
+}
+
+@online{noauthor_experimenting_2019,
+	title = {Experimenting with {DVFS}},
+	url = {http://old.gem5.org/Running_gem5.html#Experimenting_with_DVFS},
+	date = {2019},
+	file = {Running gem5 - gem5:/home/thomas/Zotero/storage/DR2JRYDY/Running_gem5.html:text/html}
+}
+
+@online{walker_mattw200gemstone-applypower_2018,
+	title = {mattw200/gemstone-applypower},
+	url = {https://github.com/mattw200/gemstone-applypower},
+	titleaddon = {{GitHub}},
+	author = {Walker, Matthew},
+	date = {2018},
+	langid = {english},
+	file = {Snapshot:/home/thomas/Zotero/storage/VNBANI9E/gemstone-applypower.html:text/html}
+}
+
+@online{hansen_gem5-319_2020,
+	title = {[{GEM}5-319] gem5 {ARM} example \{\{fs\_power.py\}\} script does not work. - Jira},
+	url = {https://gem5.atlassian.net/browse/GEM5-319},
+	author = {Hansen, Thomas Ekström and Travaglini, Giacomo},
+	date = {2020-02-07},
+	file = {[GEM5-319] gem5 ARM example \{\{fs_power.py\}\} script does not work. - Jira:/home/thomas/Zotero/storage/392AMC6G/GEM5-319.html:text/html}
+}
+
+@online{lowe-power_learning_2019,
+	title = {Learning gem5},
+	url = {http://learning.gem5.org/book/index.html},
+	titleaddon = {gem5 Tutorial — gem5 Tutorial 0.1 documentation},
+	author = {Lowe-Power, Jason},
+	date = {2019},
+	file = {gem5 Tutorial — gem5 Tutorial 0.1 documentation:/home/thomas/Zotero/storage/S2TYAVYN/index.html:text/html}
+}
+
+@online{noauthor_gem5_nodate-3,
+	title = {gem5: Statistics},
+	url = {http://www.gem5.org/documentation/general_docs/statistics/},
+	file = {gem5\: Statistics:/home/thomas/Zotero/storage/3GQ4XMSB/statistics.html:text/html}
+}
+
+@online{hansen_gem5-463_2020,
+	title = {[{GEM}5-463] The "clock" stat is inaccessible in power models - Jira},
+	url = {https://gem5.atlassian.net/browse/GEM5-463},
+	author = {Hansen, Thomas Ekström and Nikoleris, Nikos},
+	urldate = {2020-05-15},
+	date = {2020-04-22},
+	file = {[GEM5-463] The "clock" stat is inaccessible in power models - Jira:/home/thomas/Zotero/storage/D2TULNSI/GEM5-463.html:text/html}
+}
+
+@online{noauthor_error_2020,
+	title = {Error compiling sniper 7.2 - Google Groups},
+	url = {https://groups.google.com/forum/#!topic/snipersim/De4-E9wkeU4},
+	date = {2020-01-14},
+	file = {Error compiling sniper 7.2 - Google Groups:/home/thomas/Zotero/storage/XZJPGRDY/forum.html:text/html}
+}
+
+@online{noauthor_sniper_2020,
+	title = {Sniper},
+	url = {http://snipersim.org/w/The_Sniper_Multi-Core_Simulator},
+	date = {2020-04-14},
+	file = {Sniper:/home/thomas/Zotero/storage/R58ZMWSC/The_Sniper_Multi-Core_Simulator.html:text/html}
+}
+
+@article{carlson_evaluation_2014,
+	title = {An Evaluation of High-Level Mechanistic Core Models},
+	volume = {11},
+	issn = {1544-3566, 1544-3973},
+	url = {https://dl.acm.org/doi/10.1145/2629677},
+	doi = {10.1145/2629677},
+	pages = {1--25},
+	number = {3},
+	journaltitle = {{ACM} Transactions on Architecture and Code Optimization},
+	shortjournal = {{ACM} Trans. Archit. Code Optim.},
+	author = {Carlson, Trevor E. and Heirman, Wim and Eyerman, Stijn and Hur, Ibrahim and Eeckhout, Lieven},
+	date = {2014-10-27},
+	langid = {english},
+	file = {Carlson et al. - 2014 - An Evaluation of High-Level Mechanistic Core Model.pdf:/home/thomas/Zotero/storage/Y5ZAIX4K/Carlson et al. - 2014 - An Evaluation of High-Level Mechanistic Core Model.pdf:application/pdf}
+}
+
+@inproceedings{carlson_sniper_2011,
+	location = {Seattle, Washington},
+	title = {Sniper: exploring the level of abstraction for scalable and accurate parallel multi-core simulation},
+	isbn = {978-1-4503-0771-0},
+	url = {http://dl.acm.org/citation.cfm?doid=2063384.2063454},
+	doi = {10.1145/2063384.2063454},
+	shorttitle = {Sniper},
+	abstract = {Two major trends in high-performance computing, namely, larger numbers of cores and the growing size of on-chip cache memory, are creating signiﬁcant challenges for evaluating the design space of future processor architectures. Fast and scalable simulations are therefore needed to allow for suﬃcient exploration of large multi-core systems within a limited simulation time budget. By bringing together accurate highabstraction analytical models with fast parallel simulation, architects can trade oﬀ accuracy with simulation speed to allow for longer application runs, covering a larger portion of the hardware design space. Interval simulation provides this balance between detailed cycle-accurate simulation and one-{IPC} simulation, allowing long-running simulations to be modeled much faster than with detailed cycle-accurate simulation, while still providing the detail necessary to observe core-uncore interactions across the entire system. Validations against real hardware show average absolute errors within 25\% for a variety of multi-threaded workloads; more than twice as accurate on average as one-{IPC} simulation. Further, we demonstrate scalable simulation speed of up to 2.0 {MIPS} when simulating a 16-core system on an 8-core {SMP} machine.},
+	eventtitle = {2011 International Conference for High Performance Computing, Networking, Storage and Analysis},
+	pages = {1},
+	booktitle = {Proceedings of 2011 International Conference for High Performance Computing, Networking, Storage and Analysis on - {SC} '11},
+	publisher = {{ACM} Press},
+	author = {Carlson, Trevor E. and Heirman, Wim and Eeckhout, Lieven},
+	date = {2011},
+	langid = {english},
+	file = {Carlson et al. - 2011 - Sniper exploring the level of abstraction for sca.pdf:/home/thomas/Zotero/storage/3DNFH33E/Carlson et al. - 2011 - Sniper exploring the level of abstraction for sca.pdf:application/pdf}
+}
