@@ -4,6 +4,7 @@ import random
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 import sklearn
 from sklearn.preprocessing import minmax_scale, OneHotEncoder
@@ -609,6 +610,7 @@ if not outdir.endswith('/'):
 df_to_use = df1_n_s
 suptitle = "Comparisons between the most similar benchmark, the actual bm," \
            " and a random config's results"
+sns.set_style('whitegrid')
 
 if args.no_random:
     for rand_cfg in df_to_use['config'].unique():
