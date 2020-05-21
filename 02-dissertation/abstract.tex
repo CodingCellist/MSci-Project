@@ -7,6 +7,14 @@ adjusting the DVFS points accordingly, potentially even switching some cores
 off entirely.
 
 In this project, I explore these points using the gem5 Simulator, a highly 
-accurate simulator with support for both DVFS and power modelling. I present a 
-number of findings concerning the use of ARM PMUs for energy prediction, as well
-provide insight into the challenges that come with studying this area.
+accurate simulator with support for both DVFS and power modelling. I present 
+initial findings which suggest that the use of ARM PMUs for energy prediction 
+can be highly effective and accurate for scheduling, motivating further research
+into the topic.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{result-plots/stock-2b2L/system-scatter.png}
+    \caption{Initial findings encourage looking into the use of ARM PMUs in
+             scheduling, in order to balance performance and energy savings}
+\end{figure}
