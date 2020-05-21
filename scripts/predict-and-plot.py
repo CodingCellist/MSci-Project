@@ -4,11 +4,15 @@ import random
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 import seaborn as sns
 
 import sklearn
 from sklearn.preprocessing import minmax_scale, OneHotEncoder
 from sklearn.neighbors import KNeighborsClassifier
+
+from statistics import geometric_mean
+from scipy.stats import sem
 
 
 def get_args():
@@ -20,12 +24,9 @@ def get_args():
                              " configs, e.g. 2b2L,4b4L. Each b+L must equal a"
                              " power of 2 (for thread reasons)."
                              " DEFAULTS TO 2b2L")
-    parser.add_argument('--plot-stock',  action='store_true',
-                        help="Include the 'stock' setup's performance on the"
-                             " plots.")
-    parser.add_argument('--no-random', action='store_true',
-                        help="Iterate all the possible random configs and plot"
-                             " them, instead of picking one at random.")
+    parser.add_argument('--baseline', default='2b2L',
+                        choices=['1b1L', '2b2L', '4b4L', '3b1L', '1b3L'],
+                        help="Baseline config to plot. DEFAULTS TO 2b2L")
     parser.add_argument('--outdir', default='./',
                         help="Directory to store the plot(s) in."
                              " DEFAULTS TO './', I.E. THE CURRENT DIRECTORY")
@@ -262,7 +263,7 @@ def get_stock_config_data(df, stock_config):
 
 
 def predict_and_compare(all_data: pd.DataFrame, stock_config, benchmarks,
-                        random_override=None):
+                        baseline_config):
     if isinstance(stock_config, list):
         assert len(stock_config) == 2
         stock_n_threads = []
@@ -271,7 +272,6 @@ def predict_and_compare(all_data: pd.DataFrame, stock_config, benchmarks,
     else:
         stock_n_threads = int(stock_config[0]) + int(stock_config[2])
     stock_data = get_stock_config_data(all_data, stock_config)
-    configs = all_data['config'].unique()
 
     enc = OneHotEncoder()
     model = KNeighborsClassifier()
@@ -310,13 +310,13 @@ def predict_and_compare(all_data: pd.DataFrame, stock_config, benchmarks,
         # ties break by 1st max-key encountered (this is just how max works)
         most_similar_bm = max(most_similar_votes, key=most_similar_votes.get)
         # find the optimal setup for the most similar benchmark
-        best_configs = find_best_config(df_wo_bm, most_similar_bm)
+        most_similar_optima = find_best_config(df_wo_bm, most_similar_bm)
         # TODO: for now, we're just taking the first optimum, could try to do
         #       something clever like averages?
         # TODO: Afterthought: never actually seen multiple optima...
-        best_config = best_configs[0]
+        most_similar_optimum = most_similar_optima[0]
 
-        config = best_config['config']
+        config = most_similar_optimum['config']
 
         # get results of that optimum using the actual benchmark
         actual_results_mask = (all_data['benchmark'] == bm) \
@@ -327,33 +327,26 @@ def predict_and_compare(all_data: pd.DataFrame, stock_config, benchmarks,
         assert len(actual_results) == 1
         actual_results = actual_results[0]
 
-        # similar, but for the stock run
-        stock_results = find_best_config(run_results, bm)
-        assert len(stock_results) == 1
-        stock_results = stock_results[0]
+        # similar, but the actual best given all data on configs
+        complete_information_mask = all_data['benchmark'] == bm
+        complete_information_df = all_data[complete_information_mask]
+        absolute_bests = find_best_config(complete_information_df, bm)
+        absolute_best = absolute_bests[0]
 
-        # get results of taking a random config (overrideable to easily generate
-        # all random combinations)
-        if random_override is not None:
-            rand_config = random_override
-        else:
-            rand_config = random.choice(configs)
-        rand_mask = (all_data['benchmark'] == bm) \
-                    & (all_data['config'] == rand_config)
-        rand_results_df = all_data[rand_mask]
-        rand_results = find_best_config(rand_results_df, bm)
-        assert len(rand_results) == 1
-        rand_results = rand_results[0]
+        # get results of taking a baseline config
+        baseline_mask = (all_data['benchmark'] == bm) \
+                        & (all_data['config'] == baseline_config)
+        baseline_results_df = all_data[baseline_mask]
+        baseline_results = find_best_config(baseline_results_df, bm)
+        assert len(baseline_results) == 1
+        baseline_results = baseline_results[0]
 
         comparisons[bm] = {
-            'stock': stock_results,
-            'actual': actual_results,
-            'random': rand_results,
-            'most_similar': best_config
+            'perfect': absolute_best,
+            'predicted': actual_results,
+            'baseline': baseline_results
         }
 
-        # add extra info for most_similar
-        comparisons[bm]['most_similar']['bm_name'] = most_similar_bm
     return comparisons
 
 
@@ -380,46 +373,28 @@ def autolabel(ax, bars, labels, similars_bm_names=None):
                         color='tab:blue', rotation=90)
 
 
-def _comparison_plot_helper(labels, y_label, ax,
-                            similars_values, similars_configs,
-                            similars_bm_names,
-                            stock_values, stock_configs,
-                            actuals_values, actuals_configs,
-                            randoms_values, randoms_configs,
-                            subplot_title=None,
-                            plot_stock=False):
+def _bar_plot_helper(labels, y_label, ax,
+                     perfects_values, perfects_configs,
+                     predicted_constraints_values,
+                     predicted_constraints_configs,
+                     baseline_values, baseline_configs,
+                     subplot_title=None):
     x = np.arange(len(labels))
-    if plot_stock:
-        width = 0.4
-    else:
-        width = 0.35
+    width = 0.35
 
     # create grouped bar plots
-    if plot_stock:
-        similars_bars = \
-            ax.bar(x - 3 * width / 8, similars_values, width / 4,
-                   label='most_similar',
-                   color='tab:blue')
-        stock_bars = \
-            ax.bar(x - width / 8, stock_values, width / 4, label='stock',
-                   color='tab:orange')
-        actuals_bars = \
-            ax.bar(x + width / 8, actuals_values, width / 4, label='actual',
-                   color='tab:green')
-        randoms_bars = \
-            ax.bar(x + 3 * width / 8, randoms_values, width / 4, label='random',
-                   color='tab:red')
-    else:
-        similars_bars = \
-            ax.bar(x - width / 3, similars_values, width / 3,
-                   label='most_similar',
-                   color='tab:blue')
-        actuals_bars = \
-            ax.bar(x, actuals_values, width / 3, label='actual',
-                   color='tab:green')
-        randoms_bars = \
-            ax.bar(x + width / 3, randoms_values, width / 3, label='random',
-                   color='tab:red')
+    perfect_bars = \
+        ax.bar(x - width / 3, perfects_values, width / 3,
+               label='ideal_config',
+               color='tab:blue')
+    predicted_bars = \
+        ax.bar(x, predicted_constraints_values, width / 3,
+               label='predicted_ideal_config',
+               color='tab:green')
+    baseline_bars = \
+        ax.bar(x + width / 3, baseline_values, width / 3,
+               label='baseline',
+               color='tab:red')
 
     # add text
     ax.set_ylabel(y_label)
@@ -430,72 +405,17 @@ def _comparison_plot_helper(labels, y_label, ax,
     ax.legend()
 
     # add labels on top on of the bars
-    autolabel(ax, similars_bars, similars_configs,
-              similars_bm_names=similars_bm_names)
-    autolabel(ax, actuals_bars, actuals_configs)
-    autolabel(ax, randoms_bars, randoms_configs)
-    if plot_stock:
-        autolabel(ax, stock_bars, stock_configs)
+    autolabel(ax, perfect_bars, perfects_configs)
+    autolabel(ax, predicted_bars, predicted_constraints_configs)
+    autolabel(ax, baseline_bars, baseline_configs)
 
 
-def plot_comparisons(comparisons, labels, suptitle, figsize=(19.2, 10.8),
-                     outfile='comparisons-plot.png',
-                     plot_stock=False):
-    # VALUE EXTRACTIONS
-    ## similar bm names
-    similars_bm_names = \
-        [comparisons[bm]['most_similar']['bm_name'] for bm in benchmarks]
-    ## configs
-    similars_configs = \
-        [comparisons[bm]['most_similar']['config'] for bm in benchmarks]
-    stock_configs = \
-        [comparisons[bm]['stock']['config'] for bm in benchmarks]
-    actuals_configs = \
-        [comparisons[bm]['actual']['config'] for bm in benchmarks]
-    randoms_configs = \
-        [comparisons[bm]['random']['config'] for bm in benchmarks]
-
-    ## big cycles
-    similars_b_cycles = \
-        [comparisons[bm]['most_similar']['b_cycles'] for bm in benchmarks]
-    stock_b_cycles = \
-        [comparisons[bm]['stock']['b_cycles'] for bm in benchmarks]
-    actuals_b_cycles = \
-        [comparisons[bm]['actual']['b_cycles'] for bm in benchmarks]
-    randoms_b_cycles = \
-        [comparisons[bm]['random']['b_cycles'] for bm in benchmarks]
-
-    ## LITTLE cycles
-    similars_l_cycles = \
-        [comparisons[bm]['most_similar']['l_cycles'] for bm in benchmarks]
-    stock_l_cycles = \
-        [comparisons[bm]['stock']['l_cycles'] for bm in benchmarks]
-    actuals_l_cycles = \
-        [comparisons[bm]['actual']['l_cycles'] for bm in benchmarks]
-    randoms_l_cycles = \
-        [comparisons[bm]['random']['l_cycles'] for bm in benchmarks]
-
-    ## big power
-    similars_b_powers = \
-        [comparisons[bm]['most_similar']['b_power'] for bm in benchmarks]
-    stock_b_powers = \
-        [comparisons[bm]['stock']['b_power'] for bm in benchmarks]
-    actuals_b_powers = \
-        [comparisons[bm]['actual']['b_power'] for bm in benchmarks]
-    randoms_b_powers = \
-        [comparisons[bm]['random']['b_power'] for bm in benchmarks]
-
-    ## LITTLE power
-    similars_l_powers = \
-        [comparisons[bm]['most_similar']['l_power'] for bm in benchmarks]
-    stock_l_powers = \
-        [comparisons[bm]['stock']['l_power'] for bm in benchmarks]
-    actuals_l_powers = \
-        [comparisons[bm]['actual']['l_power'] for bm in benchmarks]
-    randoms_l_powers = \
-        [comparisons[bm]['random']['l_power'] for bm in benchmarks]
-
-    # PLOT!
+def plot_bars(suptitle, figsize, outfile, labels, perfects_configs,
+              perfects_b_cycles, perfects_l_cycles, perfects_b_powers,
+              perfects_l_powers, predicteds_configs, predicteds_b_cycles,
+              predicteds_l_cycles, predicteds_b_powers, predicteds_l_powers,
+              baselines_configs, baselines_b_cycles, baselines_l_cycles,
+              baselines_b_powers, baselines_l_powers):
     y_labels = ['big_cycles', 'little_cycles',
                 'minmax-scaled power', 'minmax-scaled power']
     subplot_titles = [
@@ -512,48 +432,185 @@ def plot_comparisons(comparisons, labels, suptitle, figsize=(19.2, 10.8),
                              )
     for y_label_i, ax in zip(range(len(y_labels)), axes.flatten()):
         if y_label_i == 0:
-            _comparison_plot_helper(labels, y_labels[y_label_i], ax,
-                                    similars_b_cycles, similars_configs,
-                                    similars_bm_names,
-                                    stock_b_cycles, stock_configs,
-                                    actuals_b_cycles, actuals_configs,
-                                    randoms_b_cycles, randoms_configs,
-                                    subplot_titles[y_label_i],
-                                    plot_stock
-                                    )
+            _bar_plot_helper(labels, y_labels[y_label_i], ax,
+                             perfects_b_cycles, perfects_configs,
+                             predicteds_b_cycles, predicteds_configs,
+                             baselines_b_cycles, baselines_configs,
+                             subplot_titles[y_label_i])
         elif y_label_i == 1:
-            _comparison_plot_helper(labels, y_labels[y_label_i], ax,
-                                    similars_l_cycles, similars_configs,
-                                    similars_bm_names,
-                                    stock_l_cycles, stock_configs,
-                                    actuals_l_cycles, actuals_configs,
-                                    randoms_l_cycles, randoms_configs,
-                                    subplot_titles[y_label_i],
-                                    plot_stock
-                                    )
+            _bar_plot_helper(labels, y_labels[y_label_i], ax,
+                             perfects_l_cycles, perfects_configs,
+                             predicteds_l_cycles, predicteds_configs,
+                             baselines_l_cycles, baselines_configs,
+                             subplot_titles[y_label_i])
         elif y_label_i == 2:
-            _comparison_plot_helper(labels, y_labels[y_label_i], ax,
-                                    similars_b_powers, similars_configs,
-                                    similars_bm_names,
-                                    stock_b_powers, stock_configs,
-                                    actuals_b_powers, actuals_configs,
-                                    randoms_b_powers, randoms_configs,
-                                    subplot_titles[y_label_i],
-                                    plot_stock
-                                    )
+            _bar_plot_helper(labels, y_labels[y_label_i], ax,
+                             perfects_b_powers, perfects_configs,
+                             predicteds_b_powers, predicteds_configs,
+                             baselines_b_powers, baselines_configs,
+                             subplot_titles[y_label_i])
         elif y_label_i == 3:
-            _comparison_plot_helper(labels, y_labels[y_label_i], ax,
-                                    similars_l_powers, similars_configs,
-                                    similars_bm_names,
-                                    stock_l_powers, stock_configs,
-                                    actuals_l_powers, actuals_configs,
-                                    randoms_l_powers, randoms_configs,
-                                    subplot_titles[y_label_i],
-                                    plot_stock
-                                    )
+            _bar_plot_helper(labels, y_labels[y_label_i], ax,
+                             perfects_l_powers, perfects_configs,
+                             predicteds_l_powers, predicteds_configs,
+                             baselines_l_powers, baselines_configs,
+                             subplot_titles[y_label_i])
     fig.suptitle(suptitle, fontsize=14)
     fig.savefig(outfile)
     plt.close(fig)
+
+
+def _scatter_plot_helper(labels, x_label, y_label, ax, perfects_values,
+                         predicteds_constraints_values, subplot_title,
+                         lim_low, lim_high):
+    scatter = ax.scatter(perfects_values, predicteds_constraints_values,
+                         cmap=plt.get_cmap('tab10'),
+                         c=range(len(labels)))
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(subplot_title)
+    ax.set(xlim=(lim_low, lim_high), ylim=(lim_low, lim_high))
+    # add a colour legend
+    legend_elems = list(scatter.legend_elements())
+    legend_elems[1] = labels
+    legend = ax.legend(*legend_elems,
+                       loc="upper right", title="Benchmarks")
+    ax.add_artist(legend)
+    # add a line through y=x
+    line = mlines.Line2D([lim_low, lim_high], [lim_low, lim_high],
+                         color='tab:gray', linestyle='--',
+                         alpha=0.5)
+    ax.add_line(line)
+    # add the geometric mean
+    perfects_gm = geometric_mean(perfects_values)
+    predicteds_gm = geometric_mean(predicteds_constraints_values)
+    ax.plot(perfects_gm, predicteds_gm, 'ok')
+    ax.annotate('geometric mean',
+                xy=(perfects_gm, predicteds_gm),
+                xytext=(3, 3),  # 3 points vertical offset
+                textcoords="offset points",
+                ha='left', va='bottom',
+                )
+
+
+def plot_scatter(suptitle, figsize, outfile, labels, perfects_configs,
+                 perfects_b_cycles, perfects_l_cycles, perfects_b_powers,
+                 perfects_l_powers, predicteds_configs, predicteds_b_cycles,
+                 predicteds_l_cycles, predicteds_b_powers, predicteds_l_powers):
+    x_labels = [
+        'ideal_b_cycles',
+        'ideal_l_cycles',
+        'ideal_b_power',
+        'ideal_l_power'
+    ]
+    y_labels = [
+        'predicted_ideal_b_cycles',
+        'predicted_ideal_l_cycles',
+        'predicted_ideal_b_power',
+        'predicted_ideal_l_power'
+    ]
+    subplot_titles = [
+        'b_cycles: ideal vs. predicted',
+        'l_cycles: ideal vs. predicted',
+        'b_power: ideal vs. predicted',
+        'l_power: ideal vs. predicted'
+    ]
+
+    fig, axes = plt.subplots(nrows=2,
+                             ncols=2,
+                             figsize=figsize,
+                             constrained_layout=True,
+                             # sharex=True
+                             )
+
+    for i, ax in zip(range(len(x_labels)), axes.flatten()):
+        if i == 0:
+            _scatter_plot_helper(labels, x_labels[i], y_labels[i], ax,
+                                 perfects_b_cycles, predicteds_b_cycles,
+                                 subplot_titles[i],
+                                 lim_low=0,
+                                 lim_high=6 * 1e9)
+        elif i == 1:
+            _scatter_plot_helper(labels, x_labels[i], y_labels[i], ax,
+                                 perfects_l_cycles, predicteds_l_cycles,
+                                 subplot_titles[i],
+                                 lim_low=0,
+                                 lim_high=6 * 1e9)
+        elif i == 2:
+            _scatter_plot_helper(labels, x_labels[i], y_labels[i], ax,
+                                 perfects_b_powers, predicteds_b_powers,
+                                 subplot_titles[i],
+                                 lim_low=0,
+                                 lim_high=1.5)
+        elif i == 3:
+            _scatter_plot_helper(labels, x_labels[i], y_labels[i], ax,
+                                 perfects_l_powers, predicteds_l_powers,
+                                 subplot_titles[i],
+                                 lim_low=0,
+                                 lim_high=1.5)
+
+    fig.suptitle(suptitle, fontsize=14)
+    fig.savefig(outfile)
+    plt.close(fig)
+
+
+def plot_comparisons(comparisons, labels, bars_suptitle, scatter_suptitle,
+                     figsize=(19.2, 10.8),
+                     bars_outfile='comparisons-bars.png',
+                     scatter_outfile='comparisons-scatter.png'):
+    # VALUE EXTRACTIONS
+    ## configs
+    perfects_configs = \
+        [comparisons[bm]['perfect']['config'] for bm in benchmarks]
+    predicteds_configs = \
+        [comparisons[bm]['predicted']['config'] for bm in benchmarks]
+    baselines_configs = \
+        [comparisons[bm]['baseline']['config'] for bm in benchmarks]
+
+    ## big cycles
+    perfects_b_cycles = \
+        [comparisons[bm]['perfect']['b_cycles'] for bm in benchmarks]
+    predicteds_b_cycles = \
+        [comparisons[bm]['predicted']['b_cycles'] for bm in benchmarks]
+    baselines_b_cycles = \
+        [comparisons[bm]['baseline']['b_cycles'] for bm in benchmarks]
+
+    ## LITTLE cycles
+    perfects_l_cycles = \
+        [comparisons[bm]['perfect']['l_cycles'] for bm in benchmarks]
+    predicteds_l_cycles = \
+        [comparisons[bm]['predicted']['l_cycles'] for bm in benchmarks]
+    baselines_l_cycles = \
+        [comparisons[bm]['baseline']['l_cycles'] for bm in benchmarks]
+
+    ## big power
+    perfects_b_powers = \
+        [comparisons[bm]['perfect']['b_power'] for bm in benchmarks]
+    predicteds_b_powers = \
+        [comparisons[bm]['predicted']['b_power'] for bm in benchmarks]
+    baselines_b_powers = \
+        [comparisons[bm]['baseline']['b_power'] for bm in benchmarks]
+
+    ## LITTLE power
+    perfects_l_powers = \
+        [comparisons[bm]['perfect']['l_power'] for bm in benchmarks]
+    predicteds_l_powers = \
+        [comparisons[bm]['predicted']['l_power'] for bm in benchmarks]
+    baselines_l_powers = \
+        [comparisons[bm]['baseline']['l_power'] for bm in benchmarks]
+
+    # PLOT!
+    plot_bars(bars_suptitle, figsize, bars_outfile, labels, perfects_configs,
+              perfects_b_cycles, perfects_l_cycles, perfects_b_powers,
+              perfects_l_powers, predicteds_configs, predicteds_b_cycles,
+              predicteds_l_cycles, predicteds_b_powers, predicteds_l_powers,
+              baselines_configs, baselines_b_cycles, baselines_l_cycles,
+              baselines_b_powers, baselines_l_powers)
+    plot_scatter(scatter_suptitle, figsize, scatter_outfile, labels,
+                 perfects_configs, perfects_b_cycles, perfects_l_cycles,
+                 perfects_b_powers, perfects_l_powers, predicteds_configs,
+                 predicteds_b_cycles, predicteds_l_cycles, predicteds_b_powers,
+                 predicteds_l_powers)
 
 
 args = get_args()
@@ -563,10 +620,7 @@ if ',' in args.stock_config:
     stock_cfg = [stock_configs[0], stock_configs[1]]
 else:
     stock_cfg = args.stock_config
-if isinstance(stock_cfg, list) and args.plot_stock:
-    print('Error: Including the stock config on plots only works with one'
-          ' stock config, sorry.')
-    exit(1)
+baseline_cfg = args.baseline
 
 # read the raw data
 df0 = pd.read_csv(args.csv_file)
@@ -608,21 +662,17 @@ if not outdir.endswith('/'):
     outdir += '/'
 
 df_to_use = df1_n_s
-suptitle = "Comparisons between the most similar benchmark, the actual bm," \
-           " and a random config's results"
-sns.set_style('whitegrid')
+bars_suptitle = "Comparisons between the ideal config, the predicted ideal" \
+                " config, and the baseline config"
+bars_outfile = outdir + 'bars-baseline-' + baseline_cfg + '.png'
+scatter_suptitle = "Accuracy between the ideal and the predicted models"
+scatter_outfile = outdir + 'scatter.png'
 
-if args.no_random:
-    for rand_cfg in df_to_use['config'].unique():
-        comparisons = predict_and_compare(df_to_use, stock_cfg, benchmarks,
-                                          random_override=rand_cfg)
-        plot_comparisons(comparisons, benchmarks,
-                         suptitle=suptitle,
-                         outfile=outdir + 'rand-' + rand_cfg + '.png',
-                         plot_stock=args.plot_stock)
-else:
-    comparisons = predict_and_compare(df_to_use, stock_cfg, benchmarks)
-    plot_comparisons(comparisons, benchmarks,
-                     suptitle=suptitle,
-                     outfile=outdir + 'comparison-plot-random.png',
-                     plot_stock=args.plot_stock)
+comparisons = predict_and_compare(df_to_use, stock_cfg, benchmarks,
+                                  baseline_cfg)
+sns.set_style('whitegrid')
+plot_comparisons(comparisons, benchmarks,
+                 bars_suptitle=bars_suptitle,
+                 scatter_suptitle=scatter_suptitle,
+                 bars_outfile=bars_outfile,
+                 scatter_outfile=scatter_outfile)
