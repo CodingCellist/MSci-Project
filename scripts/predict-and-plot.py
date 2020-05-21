@@ -1,6 +1,5 @@
 import argparse
 
-import random
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -419,8 +418,8 @@ def plot_bars(suptitle, figsize, outfile, labels, perfects_configs,
     y_labels = ['big_cycles', 'little_cycles',
                 'minmax-scaled power', 'minmax-scaled power']
     subplot_titles = [
-        'Cycles taken in big cluster',
-        'Cycles taken in LITTLE cluster',
+        'Max. cycles taken in big cluster',
+        'Max. cycles taken in LITTLE cluster',
         'Power used in big cluster',
         'Power used in LITTLE cluster'
     ]
@@ -455,6 +454,7 @@ def plot_bars(suptitle, figsize, outfile, labels, perfects_configs,
                              predicteds_l_powers, predicteds_configs,
                              baselines_l_powers, baselines_configs,
                              subplot_titles[y_label_i])
+
     fig.suptitle(suptitle, fontsize=14)
     fig.savefig(outfile)
     plt.close(fig)
@@ -463,16 +463,21 @@ def plot_bars(suptitle, figsize, outfile, labels, perfects_configs,
 def _scatter_plot_helper(labels, x_label, y_label, ax, perfects_values,
                          predicteds_constraints_values, subplot_title,
                          lim_low, lim_high):
-    scatter = ax.scatter(perfects_values, predicteds_constraints_values,
+    # add the geometric mean
+    perfects_gm = geometric_mean(perfects_values)
+    predicteds_gm = geometric_mean(predicteds_constraints_values)
+    # create scatter plot
+    scatter = ax.scatter(perfects_values + [perfects_gm],
+                         predicteds_constraints_values + [predicteds_gm],
                          cmap=plt.get_cmap('tab10'),
-                         c=range(len(labels)))
+                         c=range(len(labels) + 1))
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(subplot_title)
     ax.set(xlim=(lim_low, lim_high), ylim=(lim_low, lim_high))
     # add a colour legend
     legend_elems = list(scatter.legend_elements())
-    legend_elems[1] = labels
+    legend_elems[1] = list(labels) + ['geometric mean']
     legend = ax.legend(*legend_elems,
                        loc="upper right", title="Benchmarks")
     ax.add_artist(legend)
@@ -481,16 +486,6 @@ def _scatter_plot_helper(labels, x_label, y_label, ax, perfects_values,
                          color='tab:gray', linestyle='--',
                          alpha=0.5)
     ax.add_line(line)
-    # add the geometric mean
-    perfects_gm = geometric_mean(perfects_values)
-    predicteds_gm = geometric_mean(predicteds_constraints_values)
-    ax.plot(perfects_gm, predicteds_gm, 'ok')
-    ax.annotate('geometric mean',
-                xy=(perfects_gm, predicteds_gm),
-                xytext=(3, 3),  # 3 points vertical offset
-                textcoords="offset points",
-                ha='left', va='bottom',
-                )
 
 
 def plot_scatter(suptitle, figsize, outfile, labels, perfects_configs,
@@ -554,10 +549,228 @@ def plot_scatter(suptitle, figsize, outfile, labels, perfects_configs,
     plt.close(fig)
 
 
-def plot_comparisons(comparisons, labels, bars_suptitle, scatter_suptitle,
+def _plot_total_bars(suptitle, figsize, outfile, labels, perfects_configs,
+                     perfects_max_sys_cycles, perfects_tot_sys_power,
+                     predicteds_configs,
+                     predicteds_max_sys_cycles, predicteds_tot_sys_power,
+                     baselines_configs,
+                     baselines_max_sys_cycles, baselines_tot_sys_power):
+    y_labels = ['cycles', 'minmax-scaled power']
+    subplot_titles = [
+        'Max. no. cycles taken',
+        'Power used in system'
+    ]
+    fig, axes = plt.subplots(nrows=1,
+                             ncols=2,
+                             figsize=figsize,
+                             constrained_layout=True
+                             )
+    for i, ax in zip(range(len(y_labels)), axes.flatten()):
+        if i == 0:
+            _bar_plot_helper(labels, y_labels[i], ax,
+                             perfects_max_sys_cycles, perfects_configs,
+                             predicteds_max_sys_cycles, predicteds_configs,
+                             baselines_max_sys_cycles, baselines_configs,
+                             subplot_titles[i])
+        elif i == 1:
+            _bar_plot_helper(labels, y_labels[i], ax,
+                             perfects_tot_sys_power, perfects_configs,
+                             predicteds_tot_sys_power, predicteds_configs,
+                             baselines_tot_sys_power, baselines_configs,
+                             subplot_titles[i])
+
+    fig.suptitle(suptitle, fontsize=14)
+    fig.savefig(outfile)
+    plt.close(fig)
+
+
+def _plot_sys_scatter(suptitle, figsize, outfile, labels,
+                      perfects_max_cycles, perfects_tot_powers,
+                      predicteds_max_cycles, predicteds_tot_powers):
+    x_labels = [
+        'ideal_max_cycles',
+        'ideal_total_power'
+    ]
+    y_labels = [
+        'predicted_ideal_max_cycles',
+        'predicted_ideal_total_power'
+    ]
+    subplot_titles = [
+        'max_cycles: ideal vs. predicted',
+        'total_power: ideal vs. predicted'
+    ]
+
+    fig, axes = plt.subplots(nrows=1,
+                             ncols=2,
+                             figsize=figsize,
+                             constrained_layout=True,
+                             # sharex=True
+                             )
+
+    for i, ax in zip(range(len(x_labels)), axes.flatten()):
+        if i == 0:
+            _scatter_plot_helper(labels, x_labels[i], y_labels[i], ax,
+                                 perfects_max_cycles,
+                                 predicteds_max_cycles,
+                                 subplot_titles[i],
+                                 lim_low=0,
+                                 lim_high=6 * 1e9)
+        elif i == 1:
+            _scatter_plot_helper(labels, x_labels[i], y_labels[i], ax,
+                                 perfects_tot_powers,
+                                 predicteds_tot_powers,
+                                 subplot_titles[i],
+                                 lim_low=0,
+                                 lim_high=2.7)
+
+    fig.suptitle(suptitle, fontsize=14)
+    fig.savefig(outfile)
+    plt.close(fig)
+
+
+# def _plot_total_geomeans(suptitle, figsize, outfile, labels, perfects_configs,
+#                          perfects_max_sys_cycles, perfects_tot_sys_power,
+#                          predicteds_configs,
+#                          predicteds_max_sys_cycles, predicteds_tot_sys_power,
+#                          baselines_configs,
+#                          baselines_max_sys_cycles, baselines_tot_sys_power):
+#     y_labels = ['cycles', 'minmax-scaled power']
+#     subplot_titles = [
+#         'Geo. mean of no. cycles taken',
+#         'Geo. mean of power used in system'
+#     ]
+#     fig, axes = plt.subplots(nrows=1,
+#                              ncols=2,
+#                              figsize=figsize,
+#                              constrained_layout=True
+#                              )
+#     width = 0.2
+#     for i, ax in zip(range(len(y_labels)), axes.flatten()):
+#         if i == 0:
+#             ax.bar(
+#                 -width / 2,
+#                 geometric_mean(perfects_max_sys_cycles),
+#                 width,
+#                 # yerr=sem(perfects_max_sys_cycles),
+#                 label='ideal_config',
+#                 color='tab:blue'
+#             )
+#             ax.bar(
+#                 width / 2,
+#                 geometric_mean(predicteds_max_sys_cycles),
+#                 width,
+#                 # yerr=sem(predicteds_max_sys_cycles),
+#                 label='predicted_ideal_config',
+#                 color='tab:green'
+#             )
+#             ax.set_ylabel(y_labels[i])
+#             ax.set_title(subplot_titles[i])
+#             ax.set_xticks([0])
+#             ax.set_xticklabels(['geometric_mean'], rotation=30, ha='right')
+#             ax.legend()
+#         elif i == 1:
+#             ax.bar(
+#                 -width / 2,
+#                 geometric_mean(perfects_tot_sys_power),
+#                 width,
+#                 label='ideal_config',
+#                 color='tab:blue'
+#             )
+#             ax.bar(
+#                 width / 2,
+#                 geometric_mean(predicteds_tot_sys_power),
+#                 width,
+#                 label='predicted_ideal_config',
+#                 color='tab:green'
+#             )
+#             ax.set_ylabel(y_labels[i])
+#             ax.set_title(subplot_titles[i])
+#             ax.set_xticks([0])
+#             ax.set_xticklabels(['geometric_mean'], rotation=30, ha='right')
+#             ax.legend()
+#
+#     fig.suptitle(suptitle, fontsize=14)
+#     fig.savefig(outfile)
+#     plt.close(fig)
+    #
+    #
+    # # correct?
+    # cycle_gm = [perf / pred for pred, perf in zip(predicteds_max_sys_cycles, perfects_max_sys_cycles)]
+    # power_gm = [perf / pred for pred, perf in zip(predicteds_tot_sys_power, perfects_tot_sys_power)]
+    # print('cycle gm:', geometric_mean(cycle_gm))
+    # print('power gm:', geometric_mean(power_gm))
+    # print('???', geometric_mean(cycle_gm + power_gm))
+    #
+    # gms = [geometric_mean([c_rat, p_rat]) for c_rat, p_rat in zip(cycle_gm, power_gm)]
+    # fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    # ax.bar(np.arange(len(labels)),
+    #        gms,
+    #        width,
+    #        label='geometric_mean',
+    #        color='tab:blue'
+    # )
+    # ax.set_xticks(np.arange(len(labels)))
+    # ax.set_xticklabels(labels, rotation=30, ha='right')
+    # ax.legend()
+    # fig.suptitle('Geometric mean of perfect / predicted for max. cycles and total power', fontsize=14)
+    # fig.savefig('new-test/geomean-ratios-1.png')
+    # plt.close(fig)
+
+
+def plot_totals(bars_suptitle, bars_outfile,
+                scatter_suptitle, scatter_outfile,
+                figsize, labels, perfects_configs,
+                perfects_b_cycles, perfects_l_cycles, perfects_b_powers,
+                perfects_l_powers, predicteds_configs, predicteds_b_cycles,
+                predicteds_l_cycles, predicteds_b_powers, predicteds_l_powers,
+                baselines_configs, baselines_b_cycles, baselines_l_cycles,
+                baselines_b_powers, baselines_l_powers):
+
+    perfects_max_sys_cycles = [max(bc, lc) for bc, lc in
+                               zip(perfects_b_cycles, perfects_l_cycles)]
+    perfects_tot_sys_power = [bc + lc for bc, lc in
+                              zip(perfects_b_powers, perfects_l_powers)]
+    predicteds_max_sys_cycles = [max(bc, lc) for bc, lc in
+                                 zip(predicteds_b_cycles, predicteds_l_cycles)]
+    predicteds_tot_sys_power = [bc + lc for bc, lc in
+                                zip(predicteds_b_powers, predicteds_l_powers)]
+    baselines_max_sys_cycles = [max(bc, lc) for bc, lc in
+                                zip(baselines_b_cycles, baselines_l_cycles)]
+    baselines_tot_sys_power = [bc + lc for bc, lc in
+                               zip(baselines_b_powers, baselines_l_powers)]
+
+    # plot total bars
+    _plot_total_bars(bars_suptitle, figsize, bars_outfile, labels,
+                     perfects_configs,
+                     perfects_max_sys_cycles, perfects_tot_sys_power,
+                     predicteds_configs,
+                     predicteds_max_sys_cycles, predicteds_tot_sys_power,
+                     baselines_configs,
+                     baselines_max_sys_cycles, baselines_tot_sys_power)
+
+    # plot total scatter
+    _plot_sys_scatter(scatter_suptitle, figsize, scatter_outfile, labels,
+                      perfects_max_sys_cycles, perfects_tot_sys_power,
+                      predicteds_max_sys_cycles, predicteds_tot_sys_power)
+
+    # # plot total geometric means
+    # _plot_total_geomeans(geomeans_suptitle, figsize, geomeans_outfile, labels,
+    #                      perfects_configs,
+    #                      perfects_max_sys_cycles, perfects_tot_sys_power,
+    #                      predicteds_configs,
+    #                      predicteds_max_sys_cycles, predicteds_tot_sys_power,
+    #                      baselines_configs,
+    #                      baselines_max_sys_cycles, baselines_tot_sys_power)
+
+
+def plot_comparisons(comparisons, labels,
+                     bars_suptitle, scatter_suptitle,
+                     totals_suptitle, sys_scatter_suptitle,
                      figsize=(19.2, 10.8),
                      bars_outfile='comparisons-bars.png',
-                     scatter_outfile='comparisons-scatter.png'):
+                     scatter_outfile='comparisons-scatter.png',
+                     totals_outfile='system-totals.png',
+                     sys_scatter_outfile='system-scatter.png'):
     # VALUE EXTRACTIONS
     ## configs
     perfects_configs = \
@@ -600,17 +813,30 @@ def plot_comparisons(comparisons, labels, bars_suptitle, scatter_suptitle,
         [comparisons[bm]['baseline']['l_power'] for bm in benchmarks]
 
     # PLOT!
+    # bar plot per-cluster cycles and power
     plot_bars(bars_suptitle, figsize, bars_outfile, labels, perfects_configs,
               perfects_b_cycles, perfects_l_cycles, perfects_b_powers,
               perfects_l_powers, predicteds_configs, predicteds_b_cycles,
               predicteds_l_cycles, predicteds_b_powers, predicteds_l_powers,
               baselines_configs, baselines_b_cycles, baselines_l_cycles,
               baselines_b_powers, baselines_l_powers)
+
+    # scatter plot per-cluster ideal vs. predicted
     plot_scatter(scatter_suptitle, figsize, scatter_outfile, labels,
                  perfects_configs, perfects_b_cycles, perfects_l_cycles,
                  perfects_b_powers, perfects_l_powers, predicteds_configs,
                  predicteds_b_cycles, predicteds_l_cycles, predicteds_b_powers,
                  predicteds_l_powers)
+
+    # plot system-wide cycles+power, and scatters
+    plot_totals(totals_suptitle, totals_outfile, sys_scatter_suptitle,
+                sys_scatter_outfile, figsize, labels,
+                perfects_configs, perfects_b_cycles, perfects_l_cycles,
+                perfects_b_powers, perfects_l_powers,
+                predicteds_configs, predicteds_b_cycles, predicteds_l_cycles,
+                predicteds_b_powers, predicteds_l_powers,
+                baselines_configs, baselines_b_cycles, baselines_l_cycles,
+                baselines_b_powers, baselines_l_powers)
 
 
 args = get_args()
@@ -662,17 +888,39 @@ if not outdir.endswith('/'):
     outdir += '/'
 
 df_to_use = df1_n_s
+
+# per-cluster bars
 bars_suptitle = "Comparisons between the ideal config, the predicted ideal" \
                 " config, and the baseline config"
-bars_outfile = outdir + 'bars-baseline-' + baseline_cfg + '.png'
-scatter_suptitle = "Accuracy between the ideal and the predicted models"
-scatter_outfile = outdir + 'scatter.png'
+bars_outfile = outdir + 'clusters-bars.png'
 
+# per-cluster scatter plots
+scatter_suptitle = "Accuracy between the ideal and the predicted models"
+scatter_outfile = outdir + 'clusters-scatter.png'
+sys_scatter_outfile = outdir + 'system-scatter.png'
+
+# system-wide bars
+totals_suptitle = "System-wide comparisons between the ideal config," \
+                  " the predicted ideal, and the baseline config"
+totals_outfile = outdir + 'system-bars.png'
+
+# system-wide geomeans
+# geomeans_suptitle = "System-wide geometric means from the ideal config," \
+#                     " the predicted ideal, and the baseline config"
+# geomeans_outfile = outdir + 'system-geomeans.png'
+
+# GET THE COMPARISONS
 comparisons = predict_and_compare(df_to_use, stock_cfg, benchmarks,
                                   baseline_cfg)
+# PLOT!
 sns.set_style('whitegrid')
 plot_comparisons(comparisons, benchmarks,
                  bars_suptitle=bars_suptitle,
-                 scatter_suptitle=scatter_suptitle,
                  bars_outfile=bars_outfile,
-                 scatter_outfile=scatter_outfile)
+                 scatter_suptitle=scatter_suptitle,
+                 scatter_outfile=scatter_outfile,
+                 totals_suptitle=totals_suptitle,
+                 totals_outfile=totals_outfile,
+                 sys_scatter_suptitle=scatter_suptitle,
+                 sys_scatter_outfile=sys_scatter_outfile
+                 )
