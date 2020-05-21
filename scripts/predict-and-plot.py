@@ -11,7 +11,6 @@ from sklearn.preprocessing import minmax_scale, OneHotEncoder
 from sklearn.neighbors import KNeighborsClassifier
 
 from statistics import geometric_mean
-from scipy.stats import sem
 
 
 def get_args():
@@ -628,95 +627,6 @@ def _plot_sys_scatter(suptitle, figsize, outfile, labels,
     plt.close(fig)
 
 
-# def _plot_total_geomeans(suptitle, figsize, outfile, labels, perfects_configs,
-#                          perfects_max_sys_cycles, perfects_tot_sys_power,
-#                          predicteds_configs,
-#                          predicteds_max_sys_cycles, predicteds_tot_sys_power,
-#                          baselines_configs,
-#                          baselines_max_sys_cycles, baselines_tot_sys_power):
-#     y_labels = ['cycles', 'minmax-scaled power']
-#     subplot_titles = [
-#         'Geo. mean of no. cycles taken',
-#         'Geo. mean of power used in system'
-#     ]
-#     fig, axes = plt.subplots(nrows=1,
-#                              ncols=2,
-#                              figsize=figsize,
-#                              constrained_layout=True
-#                              )
-#     width = 0.2
-#     for i, ax in zip(range(len(y_labels)), axes.flatten()):
-#         if i == 0:
-#             ax.bar(
-#                 -width / 2,
-#                 geometric_mean(perfects_max_sys_cycles),
-#                 width,
-#                 # yerr=sem(perfects_max_sys_cycles),
-#                 label='ideal_config',
-#                 color='tab:blue'
-#             )
-#             ax.bar(
-#                 width / 2,
-#                 geometric_mean(predicteds_max_sys_cycles),
-#                 width,
-#                 # yerr=sem(predicteds_max_sys_cycles),
-#                 label='predicted_ideal_config',
-#                 color='tab:green'
-#             )
-#             ax.set_ylabel(y_labels[i])
-#             ax.set_title(subplot_titles[i])
-#             ax.set_xticks([0])
-#             ax.set_xticklabels(['geometric_mean'], rotation=30, ha='right')
-#             ax.legend()
-#         elif i == 1:
-#             ax.bar(
-#                 -width / 2,
-#                 geometric_mean(perfects_tot_sys_power),
-#                 width,
-#                 label='ideal_config',
-#                 color='tab:blue'
-#             )
-#             ax.bar(
-#                 width / 2,
-#                 geometric_mean(predicteds_tot_sys_power),
-#                 width,
-#                 label='predicted_ideal_config',
-#                 color='tab:green'
-#             )
-#             ax.set_ylabel(y_labels[i])
-#             ax.set_title(subplot_titles[i])
-#             ax.set_xticks([0])
-#             ax.set_xticklabels(['geometric_mean'], rotation=30, ha='right')
-#             ax.legend()
-#
-#     fig.suptitle(suptitle, fontsize=14)
-#     fig.savefig(outfile)
-#     plt.close(fig)
-    #
-    #
-    # # correct?
-    # cycle_gm = [perf / pred for pred, perf in zip(predicteds_max_sys_cycles, perfects_max_sys_cycles)]
-    # power_gm = [perf / pred for pred, perf in zip(predicteds_tot_sys_power, perfects_tot_sys_power)]
-    # print('cycle gm:', geometric_mean(cycle_gm))
-    # print('power gm:', geometric_mean(power_gm))
-    # print('???', geometric_mean(cycle_gm + power_gm))
-    #
-    # gms = [geometric_mean([c_rat, p_rat]) for c_rat, p_rat in zip(cycle_gm, power_gm)]
-    # fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
-    # ax.bar(np.arange(len(labels)),
-    #        gms,
-    #        width,
-    #        label='geometric_mean',
-    #        color='tab:blue'
-    # )
-    # ax.set_xticks(np.arange(len(labels)))
-    # ax.set_xticklabels(labels, rotation=30, ha='right')
-    # ax.legend()
-    # fig.suptitle('Geometric mean of perfect / predicted for max. cycles and total power', fontsize=14)
-    # fig.savefig('new-test/geomean-ratios-1.png')
-    # plt.close(fig)
-
-
 def plot_totals(bars_suptitle, bars_outfile,
                 scatter_suptitle, scatter_outfile,
                 figsize, labels, perfects_configs,
@@ -752,15 +662,6 @@ def plot_totals(bars_suptitle, bars_outfile,
     _plot_sys_scatter(scatter_suptitle, figsize, scatter_outfile, labels,
                       perfects_max_sys_cycles, perfects_tot_sys_power,
                       predicteds_max_sys_cycles, predicteds_tot_sys_power)
-
-    # # plot total geometric means
-    # _plot_total_geomeans(geomeans_suptitle, figsize, geomeans_outfile, labels,
-    #                      perfects_configs,
-    #                      perfects_max_sys_cycles, perfects_tot_sys_power,
-    #                      predicteds_configs,
-    #                      predicteds_max_sys_cycles, predicteds_tot_sys_power,
-    #                      baselines_configs,
-    #                      baselines_max_sys_cycles, baselines_tot_sys_power)
 
 
 def plot_comparisons(comparisons, labels,
@@ -904,10 +805,6 @@ totals_suptitle = "System-wide comparisons between the ideal config," \
                   " the predicted ideal, and the baseline config"
 totals_outfile = outdir + 'system-bars.png'
 
-# system-wide geomeans
-# geomeans_suptitle = "System-wide geometric means from the ideal config," \
-#                     " the predicted ideal, and the baseline config"
-# geomeans_outfile = outdir + 'system-geomeans.png'
 
 # GET THE COMPARISONS
 comparisons = predict_and_compare(df_to_use, stock_cfg, benchmarks,
