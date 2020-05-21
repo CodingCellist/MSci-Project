@@ -210,21 +210,23 @@ PMUs, the extracted data size is much smaller.
               configuration. This should reveal some details about the program
               and can simply be looked up since we have all the runs already.
         \item Based on the PMU data, predict what benchmark is the most similar
-              by looking at data which does not contain any information about 
-              the benchmark run, for some definition of `similar'.
+              by looking at the data which does not contain any information 
+              about the benchmark run, for some definition of `similar'.
         \item Find the optimal big.LITTLE configuration for that benchmark, for
-              some definition of `optimal', and get its results.
+              some definition of `optimal'.
         \item `Run' the actual benchmark on the configuration and measure/look
               up the actual results.
+        \item Based on the data containing all entries, find the true optimal
+              configuration for the benchmark, along with its results.
         \item Compare the predicted and actual results, along with a baseline.
     \end{enumerate}
 
-    To keep the predictions and comparisons simple, only datapoints from 
+    To keep the predictions and comparisons simple, only data points from 
     configurations where the number of threads of the benchmark was equal to 
     the number of cores available were kept. The rationale was that this 
     optimised the usage of the configuration and so allowed us to see the 
     fastest the benchmark could perform on that setup, allowing us to see if and
-    how the benchmark scaled.
+    how the benchmark scaled with the number of big and LITTLE cores available.
     
     We decided to use Nearest-Neighbours with Euclidean Distance to determine 
     similarity. This was done using the default settings for the 
@@ -232,7 +234,8 @@ PMUs, the extracted data size is much smaller.
     \cite{pedregosa_scikit-learn_2011} \texttt{neighbors} module. The stock 
     configuration was set to be a 2 big 2 LITTLE configuration because it was a 
     configuration which seemed to be somewhere in the middle, hopefully 
-    allowing for balanced predictions in either direction.
+    allowing for balanced predictions in either direction. For the same reasons,
+    this configuration was also used as the baseline.
     
     The predictions were done, leaving each benchmark out in turn and 
     retraining the module each time. Since the model returned multiple 
@@ -244,101 +247,94 @@ PMUs, the extracted data size is much smaller.
     most similar benchmark. To compare across different configurations, which 
     have a different number of cores to compare, the power was accumulated and 
     only the highest number of cycles per cluster was kept. This was done since 
-    power consumption is additive, and the largest number of cycles will 
-    indicate the last point at which the final thread of the benchmark finished.
-    It was possible to get more than one configuration back if they were equally
-    optimal, however no such situation occurred.
+    power consumption is additive, and the cores and clusters were run
+    concurrently, meaning the greatest number of cycles will indicate the last 
+    point at which the final thread of the benchmark finished. It was possible 
+    to get more than one configuration back if they were equally optimal, 
+    however no such situation occurred
     
     Taking the most similar benchmark and its optimal configuration, the data 
     from the corresponding run with the number of threads equal to the total 
-    number of cores) was retrieved, as was the data from the actual benchmark on
-    the predicted benchmark's actual configuration. Initially, the baseline was 
-    to pick a random configuration and compare with the run on this. However, 
-    due to the small number of possible configurations, each was enumerated 
-    instead so as to be able to compare all the possible setups.
+    number of cores was retrieved, as was the data from the actual optimum and
+    the baseline data.
     
-    For each baseline, a plot showing the number of cycles and amount of power 
+    For each benchmark, a plot showing the number of cycles and amount of power 
     for the big and LITTLE clusters was created. These plots allowed me to 
     easily spot and compare the performance of the various benchmarks and 
-    configurations. The name of the benchmark predicted to be the most similar
-    was put next to the bars showing its performance, for clarity.
+    configurations. Additionally, in order to get a different look at how the 
+    predicted optimum compared to the actual one, these were plotted against 
+    each other.
     
 \section{Analysis}
     \subsection{Plots and observations}
     The behaviour of the Nearest-Neighbours model for the different benchmarks 
-    is largely identical. It seems to always put the \texttt{barnes} benchmark
-    as the most similar, and the optimal configuration in this case is always
-    4b4L. The benchmark most similar to \texttt{barnes} seems to be the 
-    \texttt{fmm} benchmark, with the 1b1L configuration being the most optimal.
+    is largely identical. It seems to almost always result in the optimal 
+    configuration being 4b4L, apart from when predicting for the \texttt{barnes}
+    benchmark, where the 1b1L configuration is predicted to be the most optimal.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\textwidth]{pred-plots/stock-2b2L/rand-1b3L.png}
-        \caption{Performance comparisons using 1b3L as the baseline}
-        \label{fig:s-2b2L-r-1b3L}
+        \includegraphics[width=\textwidth]{result-plots/stock-2b2L/clusters-bars.png}
+        \caption{Per-cluster comparisons using 2b2L as the baseline}
+        \label{fig:clusters-bars}
     \end{figure}
     
-    Looking at the plots (note the y-axis for cycles is in giga, i.e. 
+    Looking at the plots (note the y-axis for cycles is in Giga, i.e. 
     \textsf{1e9}, cycles), it becomes apparent that the trade-offs are there, 
-    but that the model has not been very successful in picking up on them, or 
-    perhaps the method for finding the optimal configuration could be improved.
-    When comparing the plots with a 1b3L baseline (Figure 
-    \ref{fig:s-2b2L-r-1b3L}) with the plots with a 2b2L baseline(Figure 
-    \ref{fig:s-2b2L-r-2b2L}), i.e. sticking with the stock configuration, we can
-    see that swapping a little core for a big core marginally improves 
-    performance for certain benchmarks' LITTLE clusters (e.g. \texttt{raytrace})
-    with a slight decrease in performance (increased number of cycles taken) on 
-    the big clusters. However, the big core consumes much more power, taking 
-    nearly as much power in the \texttt{barnes} scenario as the 1b1L 
-    configuration.
+    and that the model has been mostly successful in picking the optimal 
+    configuration. For the \texttt{barnes} benchmark, the power consumption of 
+    the predicted optimal configuration is not far off the true optimum. 
+    However, the largest number of cycles is. The \texttt{fmm} benchmark reveals
+    an interesting caveat of the optimum finding algorithm: the performance of
+    the true optimum is worse than the predicted, but the power is not. In 
+    fact, when looking at the system as a whole, the total power consumption of 
+    the 1b1L setup is less than the 4b4L setup. What has likely happened is 
+    that when minimising the number of cycles and the power used, the 1b1L 
+    configuration was the first to be tried. Subsequently, although the 4b4L 
+    configuration has better performance, it does not \emph{also} have better 
+    power performance and so it was not selected. It is possible this could be 
+    fixed by making the optimum finding algorithm consider the scale of the 
+    trade-offs, and not just the values.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\textwidth]{pred-plots/stock-2b2L/rand-2b2L.png}
-        \caption{Performance comparisons using 2b2L as the baseline}
-        \label{fig:s-2b2L-r-2b2L}
+        \includegraphics[width=\textwidth]{result-plots/stock-2b2L/system-bars.png}
+        \caption{System-wide comparisons using 2b2L as the baseline}
+        \label{fig:system-bars}
     \end{figure}
 
-    Looking further at the plots with a 3b1L baseline (Figure 
-    \ref{fig:s-2b2L-r-3b1L}, both \texttt{raytrace} \texttt{radiosity} seem to 
-    improve performance and power on the LITTLE clusters, taking longer on the 
-    big cluster, with the other benchmarks increasing or decreasing by smaller 
-    amounts. Similar to the switch between 1b3L and 2b2L, adding the extra big
-    core increases power consumption a lot.
-    \begin{figure}
-        \centering
-        \includegraphics[width=\textwidth]{pred-plots/stock-2b2L/rand-3b1L.png}
-        \caption{Performance comparisons using 3b1L as the baseline}
-        \label{fig:s-2b2L-r-3b1L}
-    \end{figure}
-    
-    It should be noted that the normalisation, or perhaps the result retrieval 
-    function, seems to have not quite worked and as a result, the power plots 
-    corresponding to the cluster with 3 cores in the 3b1L and 1b3L 
-    configurations exceeds the normalised 0-1 scale. This does not happen with 
-    the other plots, so it could be that the unbalanced configuration causes a 
-    problem. Unfortunately, I was able to narrow down this bug.
-    
-    \subsection{Evaluating the prediction results}
-    The differences between the predicted results and the actual results are 
-    quite large. With most of the benchmarks, the predicted power consumption is
-    many times greater than the actual performance, both on the big and LITTLE 
-    clusters. While predicting the power consumption to be higher than it turns 
-    out to be is likely better than predicting it to be too low, it does show 
-    that the model is very imprecise, possibly due to lack of data.
-    
     Interestingly, the tactic of always going with 4b4L does not seem bad when 
     looking at the overall performance. Each time a different configuration 
     manages to do better on one cluster, it seems to come at a cost on the 
     other cluster. This is likely due to 4b4L requiring more power in theory, 
     but finishing the benchmarks so much faster that it does not matter.
     
+    \subsection{Evaluating the prediction results}
+    Plotting the true optima against the predicted optima, helps show how close 
+    most of predictions are. The majority of the benchmarks lie exactly on the 
+    $y=x$ line, indicating that the prediction was entirely correct. The plots 
+    also help explain how the prediction and true optima were off for the 
+    \texttt{barnes} and \texttt{fmm} benchmarks respectively. The power 
+    measurements are clearly very close to agreeing, but the performance 
+    measurements are much further away from the $y=x$ line. This suggests that, 
+    as mentioned with the optimum finding algorithm, some balancing to consider 
+    the scale of improvements would be beneficial. That being said, the 
+    geometric mean, taken across all the benchmarks and plotted as a cyan dot, 
+    lying very close to the $y=x$ line is a good indication that the model was 
+    good at predicting the right setup overall.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{result-plots/stock-2b2L/system-scatter.png}
+        \caption{Plotting the predicted ideal against the true ideal, for
+                 system-wide maximum number of cycles and total power use}
+    \end{figure}
+    
     \subsection{Using other stock configurations}
     In order to improve performance of the model, more data could be supplied. 
     One way of doing this would be to `run' the arriving benchmark on more than 
     one stock configuration and using the results from all the stock 
     configurations as input when predicting the most similar. I tried using 
-    pairs of configurations: 2b2L+1b3L, 2b2L+4b4L, 3b1L+1b3L. The idea was that
-    the change in balance between the configurations would lead to a change in 
-    predictions as there were `examples' of which cores affected what. However, 
-    when plotted, the results were identical. Some examples can be seen in 
-    Appendix \ref{ch:multis-pred-res}. The complete set of plots can be found in
-    the \texttt{pred-plots} directory.
+    pairs of configurations: 2b2L+4b4L, 1b1L+2b2L. The idea was that the change 
+    in balance between the configurations would lead to a change in predictions 
+    as there were `examples' of which cores affected what. However, when 
+    plotted, the results were identical. The resulting system-wide plots can be 
+    seen in Appendix \ref{ch:multis-pred-res}. The complete set of plots can be 
+    found in the \texttt{results-plots} directory.
