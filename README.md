@@ -10,6 +10,80 @@
 - [gemstone-applypower](https://github.com/mattw200/gemstone-applypower)
 
 
+# Running
+## gem5
+### Setup
+I personally found it helps to have a Python 2 virtual environment running when
+setting up gem5. The requirements for it can be installed from the
+`venv-reqs-gem5.txt` file.
+
+Clone and build the gem5 Simulator. Then, copy the files from the
+`gem5-custom-config-scripts` to the `gem5/configs/example/arm/` directory.
+
+```bash
+$ cd gem5
+$ export M5_PATH=path/to/linux/files
+```
+### Commands
+Both the commands below can further be customised by the flags:
+- `--big-cpus N`
+- `--little-cpus N`
+- `--cpu-type=<cpu-type>`
+
+Full system simulation without power:
+```bash
+$ ./build/ARM/gem5.opt configs/example/arm/fs_bL_extended.py \
+    --caches
+    --kernel=$M5_PATH/binaries/<kernel-name> \
+    --disk=$M5_PATH/disks/<disk-image-name>.img \
+    --bootloader=$M5_PATH/binaries/<bootloader> \
+    --bootscript=path/to/bootscript.rcS
+```
+Full system simulation with power:
+```bash
+$ ./build/ARM/gem5.opt configs/example/arm/fs_bigLITTLE.py \
+    --caches \
+    --kernel=$M5_PATH/binaries/<kernel-name> \
+    --disk=$M5_PATH/disks/<disk-image-name>.img \
+    --bootloader=$M5_PATH/binaries/<bootloader> \
+    --bootscript=path/to/bootscript.rcS \
+    --example-power
+```
+
+## Python scripts
+Since the complete data for this project totalled 120GB in size, it is not
+included here. However, in the `extracted-data` directory, there are two files:
+`roi-out.csv` and `roi-out_cfg-totpow.csv`. These files contain the data
+matching several PMU events and were constructed using the `data-aggregate.py`
+script. Both files should theoretically work as inputs to the scripts, but the
+`roi-out_cfg-totpow.csv` file (which contains configs and the total power, in
+addition to the stats found in roi-out.csv) is probably safer to use with most
+of the scripts.
+
+Optionally, create a Python 3 virtualenv and activate it.
+
+Install the requirements found in `venv-reqs-dataproc.txt`.
+
+Each of the scripts use `argparse` and so should provide a usage message. Please
+refer to this for detailed usage instructions.
+
+## gemstone-applypower
+Create a Python 2 virtualenv and install the requirements found in
+`venv-reqs-gemstone-applypower.txt`
+
+`cd` into `gemstone-applypower` and activate the venv
+
+For simulating Cortex A15
+```
+$ ./gemstone_create_equation.py -p models/gs-A15.params -m maps/gem5-A15.map -o gem5-A15
+```
+
+For simulating Cortex A7
+```
+$ ./gemstone_create_equation.py -p models/gs-A7.params -m maps/gem5-A7.map -o gem5-A7
+```
+
+
 # gem5 details
 ## Patches
 - [power: Fix regStats for PowerModel and PowerModelState](https://gem5-review.googlesource.com/c/public/gem5/+/26643)
@@ -190,92 +264,10 @@ Therefore, there are 2 solutions (of which I have only tested the first):
    for each of the four flags (both voltage and clock for both big and LITTLE
    cpus).
 
-~~AHAHAHAHAHAHAHAHAHAHAHAHAHAHA! Nothing is simple intuitive in this thing,~~
-~~is it??   \*Hrm, hrm\* Anyway...~~
-
-~~As can be seen in the example `configs/example/arm/fs_bigLITTLE.py` script,~~
-~~the CPUs are located in a seemingly magic `ObjectList.cpu_list`. This list~~
-~~can be printed to stdout by calling `ObjectList.cpu_list.print()` anywhere~~
-~~in the scripts using it. Unfortunately, the attributes of the SimObjects~~
-~~cannot be modified once instantiated, so in order to add custom DVFS to any~~
-~~existing CPU, we have to extend it. The example FS script imports some CPU~~
-~~things from `common.cores.arm`, so you'd be forgiven for thinking you can~~
-~~extend a CPU by importing the relevant file and extending the CPU class~~
-~~found in it.~~
-
-~~Well yes, but actually no.~~
-
-~~It turns out the magical `ObjectList` (whose source code can be found in~~
-~~`configs/common/ObjectList.py`) can only see CPUs if they're in the~~
-~~`configs/common/cores/arm` directory. So, to extend an existing CPU, create~~
-~~a new file in that directory, e.g.~~
-~~`configs/common/cores/arm/O3_ARM_v7a_3_DVFS.py`. If you're good/want to put~~
-~~the source code up anywhere ever, you should include the disclaimer and~~
-~~copyright notice from the orginal file that you're extending. In your new~~
-~~file, do `from __futures__ import absolute_import` and~~
-~~`from m5.objects import *` (don't know if that one is actually required, but~~
-~~better safe than sorry). Then, import the file you want to extend~~
-~~`from common.cores.arm import <filename>` (yes, you have to include the~~
-~~`common.cores.arm` even though you're in the directory, otherwise it can't~~
-~~find the file). Now go ahead and create your python sub-class like you~~
-~~normally would.~~
-
-~~**Note:** If you want to use custom variable names, the variables cannot be~~
-~~defined in the class. You'll need to just define them in the script and then~~
-~~use them in your class by assigning them to the "appropriate" class~~
-~~attribute names.~~
-
-## Running
-### Setup
-```bash
-$ cd gem5
-$ export M5_PATH=path/to/linux/files
-```
-### Commands
-Both the commands below can further be customised by the flags:
-- `--big-cpus N`
-- `--little-cpus N`
-- `--big-cpu-clock HZ`
-- `--little-cpu-clock HZ`
-
-Full system simulation without power:
-```bash
-$ ./build/ARM/gem5.opt configs/example/arm/fs_bigLITTLE.py \
-    --dtb=$M5_PATH/binaries/<dtb-name>.dtb \
-    --kernel=$M5_PATH/binaries/<kernel-name> \
-    --machine-type=VExpress_GEM5_V1 \
-    --disk=$M5_PATH/disks/<disk-image-name>.img \
-    --caches \
-    --bootscript=path/to/bootscript.rcS
-```
-Full system simulation with power:
-```bash
-$ ./build/ARM/gem5.opt configs/example/arm/fs_bigLITTLE.py \
-    --dtb=$M5_PATH/binaries/<dtb-name>.dtb \
-    --kernel=$M5_PATH/binaries/<kernel-name> \
-    --machine-type=VExpress_GEM5_V1 \
-    --disk=$M5_PATH/disks/<disk-image-name>.img \
-    --caches \
-    --bootscript=path/to/bootscript.rcS
-```
-
 
 # gemstone details
 ## Tutorials
 - [gemstone-applypower](http://gemstone.ecs.soton.ac.uk/gemstone-website/gemstone/tutorial-gemstone-apply-power.html)
-
-## Commands used
-(Assumes having `cd`-ed into `gemstone-applypower` and activated the venv)
-
-For simulating Cortex A15
-```
-$ ./gemstone_create_equation.py -p models/gs-A15.params -m maps/gem5-A15.map -o gem5-A15
-```
-
-For simulating Cortex A7
-```
-$ ./gemstone_create_equation.py -p models/gs-A7.params -m maps/gem5-A7.map -o gem5-A7
-```
 
 
 # Misc.
