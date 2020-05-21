@@ -796,7 +796,8 @@ bars_suptitle = "Comparisons between the ideal config, the predicted ideal" \
 bars_outfile = outdir + 'clusters-bars.png'
 
 # per-cluster scatter plots
-scatter_suptitle = "Accuracy between the ideal and the predicted models"
+scatter_suptitle = "Direct comparisons between the ideal and the predicted" \
+                   " configurations"
 scatter_outfile = outdir + 'clusters-scatter.png'
 sys_scatter_outfile = outdir + 'system-scatter.png'
 
