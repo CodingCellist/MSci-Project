@@ -1,0 +1,12 @@
+ARM big.LITTLE systems are everywhere from smart devices, to Systems on Chips, 
+to mobile phones. Common to these is an often limited energy budget, where 
+saving energy without sacrificing too much performance. With asymmetric 
+multicore processors and DVFS comes the potential for vast energy savings by 
+having the scheduler be aware of the energy used by the system tasks and 
+adjusting the DVFS points accordingly, potentially even switching some cores 
+off entirely.
+
+In this project, I explore these points using the gem5 Simulator, a highly 
+accurate simulator with support for both DVFS and power modelling. I present a 
+number of findings concerning the use of ARM PMUs for energy prediction, as well
+provide insight into the challenges that come with studying this area.
