@@ -1,9 +1,23 @@
-\begin{itemize}
-    \item gem5 is hard, not everything works as expected
-    \item lots of things went wrong, but some (hopefully interesting) results 
-          were obtained
-    \item the ML done was not successful, but the random results show that there
-          is a potential for things
-    \item ideally, would take things further: more data, better ML, hardware
-          implementations, etc., but time ran out
-\end{itemize}
+Accurate full system simulators, with support for the latest hardware and its 
+features are hugely complex, both for the developers and the users. The gem5 
+simulator is definitely a powerful tool, but it unfortunately seems to be in a 
+somewhat fragile and undocumented state concerning DVFS and power models at the 
+moment.
+
+Whilst the predictions done were not the most precise, it was demonstrated that 
+predictions can be done. Changing the configurations was shown to affect the 
+performance and energy consumption of the setups, sometimes drastically. This 
+demonstrates the importance of managing the DVFS of cores and clusters, and that
+there is potentially a lot to be gained in terms of power savings. Based on the 
+results from the predictions and the baselines, it seems schedulers should be 
+able to use the PMUs to make informed decisions as to what silicon to keep dark 
+in order to balance energy consumption and performance.
+
+Given more time, I would have liked to get more data by also running 
+configurations with only big or LITTLE cores and try to get the predictions to 
+work for varying numbers of threads as well. Other future work could include 
+the implementation on real hardware with multiple programs running 
+simultaneously; improving the predictions by determining the feature importance 
+of the different PMU events; playing with the balance of the optimum finder, to 
+see if better optima could be found if power is prioritised over number of 
+cycles, or vice versa.
