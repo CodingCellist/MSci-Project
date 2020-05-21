@@ -32,11 +32,13 @@ well.
     than WASH itself \cite{yu_colab_2020}. WASH's main focus is to make the
     scheduler big.LITTLE aware and thereby hopefully improve power usage, and as
     such it does not focus on power or energy along with big.LITTLE, meaning 
-    there is likely to be room for improvement. Finally, it turns out that 
-    WASH's decision-making does not always accelerate the program as a whole, 
-    despite running certain tasks on big cores due to some of the threads on big
-    cores actually waiting on results or feedback from threads being run on 
-    LITTLE cores \cite{yu_colab_2020}.
+    there is likely to be room for improvement. Finally, it was discovered by 
+    Yu et al. \cite{yu_colab_2020} that WASH's decision-making does not always 
+    accelerate the program as a whole, despite running computationally heavier 
+    tasks on big cores. Counterintuitively, heavy tasks running on big cores can
+    sometimes be slowed down, due to waiting on results or feedback from lighter
+    tasks running on LITTLE cores, and so it would be better to accelerate these
+    lighter tasks.
     
     \subsection{The COLAB scheduler}
     The paper describing the COLAB scheduler, published by Yu et al. earlier 
