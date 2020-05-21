@@ -663,6 +663,15 @@ def plot_totals(bars_suptitle, bars_outfile,
                       perfects_max_sys_cycles, perfects_tot_sys_power,
                       predicteds_max_sys_cycles, predicteds_tot_sys_power)
 
+    # calculate and print the geometric means
+    ratio_cycles = [perf / pred for perf, pred in
+                    zip(perfects_max_sys_cycles, predicteds_max_sys_cycles)]
+    ratio_powers = [perf / pred for perf, pred in
+                    zip(perfects_tot_sys_power, predicteds_tot_sys_power)]
+    print('Geometric mean for cycle ratios: ', geometric_mean(ratio_cycles))
+    print('Geometric mean for total power use ratios:',
+          geometric_mean(ratio_powers))
+
 
 def plot_comparisons(comparisons, labels,
                      bars_suptitle, scatter_suptitle,
