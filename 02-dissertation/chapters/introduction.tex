@@ -35,12 +35,18 @@ power consumption in big.LITTLE systems. I then use it to explore if
 predictions based on existing PMU data obtained from a stock configuration can 
 be used to correctly predict the optimal big.LITTLE configuration to run the 
 program on. I find that although gem5 can be challenging to use, the simulations
-are possible and even limited data can be used to create promising models for 
-predicting the optimal configuration. This is promising for further research 
-into the area.
+are possible and even limited data can be used to create promising models which 
+come close to the ideal performance ratios when predicting the optimal 
+configuration. This is promising for further research into the area.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{result-plots/stock-2b2L/system-scatter.png}
     \caption{Initial results based on data obtained from gem5 seems highly
              promising in terms of the use of PMUs in scheduling}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{screenshots/promising-geomeans.png}
+    \caption{Although based on a small sample size, the model has very good
+             ratios for ideal / predicted}
 \end{figure}
