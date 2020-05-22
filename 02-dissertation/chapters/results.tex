@@ -326,6 +326,22 @@ PMUs, the extracted data size is much smaller.
         \caption{Plotting the predicted ideal against the true ideal, for
                  system-wide maximum number of cycles and total power use}
     \end{figure}
+
+    Although the sample size is small, computing the improvement ratios of the 
+    maximum number of cycles and the total power used by dividing the ideal 
+    values by the predicted ones, and then calculating the geometric mean of 
+    these ratios seems highly promising. The geometric mean comes out to be 
+    $\approx 98.77\%$ for the cycle ratios and $\approx 99.28\%$ for the power
+    ratios. This confirms that there is little to be improved in terms of the
+    power predictions, and also seems to suggest that despite the size of the 
+    performance outliers, the space for improvement may be smaller than 
+    initially anticipated. However, as mentioned earlier, this is based on a 
+    small sample size and more data would be required to say for certain.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{screenshots/promising-geomeans.png}
+        \caption{The geometric means for improvement ratios seem very promising}
+    \end{figure}
     
     \subsection{Using other stock configurations}
     In order to improve performance of the model, more data could be supplied. 
