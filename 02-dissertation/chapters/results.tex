@@ -244,14 +244,16 @@ PMUs, the extracted data size is much smaller.
     comparison. Based on which benchmark was predicted to be most similar, the 
     optimal configuration for that benchmark was then found by minimising all 
     the number of cycles and amounts of power consumed by the setup for the most
-    most similar benchmark. To compare across different configurations, which 
-    have a different number of cores to compare, the power was accumulated and 
-    only the highest number of cycles per cluster was kept. This was done since 
-    power consumption is additive, and the cores and clusters were run
-    concurrently, meaning the greatest number of cycles will indicate the last 
-    point at which the final thread of the benchmark finished. It was possible 
-    to get more than one configuration back if they were equally optimal, 
-    however no such situation occurred
+    most similar benchmark.
+    
+    To compare across different configurations, which have a different number 
+    of cores to compare, the power was accumulated and only the highest number 
+    of cycles per cluster was kept. This was done since power consumption is 
+    additive, and the cores and clusters were run concurrently, meaning the 
+    greatest number of cycles will indicate the last point at which the final 
+    thread of the benchmark finished. It was possible to get more than one 
+    configuration back if they were equally optimal, however no such situation 
+    occurred.
     
     Taking the most similar benchmark and its optimal configuration, the data 
     from the corresponding run with the number of threads equal to the total 
