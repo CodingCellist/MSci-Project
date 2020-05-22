@@ -41,7 +41,7 @@ $ ./build/ARM/gem5.opt configs/example/arm/fs_bL_extended.py \
 ```
 Full system simulation with power:
 ```bash
-$ ./build/ARM/gem5.opt configs/example/arm/fs_bigLITTLE.py \
+$ ./build/ARM/gem5.opt configs/example/arm/fs_bL_extended.py \
     --caches \
     --kernel=$M5_PATH/binaries/<kernel-name> \
     --disk=$M5_PATH/disks/<disk-image-name>.img \
