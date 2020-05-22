@@ -33,11 +33,14 @@ interesting and highly applicable research areas open.
 In this project, I explore how to use the gem5 simulator to model DVFS and 
 power consumption in big.LITTLE systems. I then use it to explore if 
 predictions based on existing PMU data obtained from a stock configuration can 
-be used to correctly predict the optimal big.LITTLE configuration to run the 
-program on. I find that although gem5 can be challenging to use, the simulations
-are possible and even limited data can be used to create promising models which 
-come close to the ideal performance ratios when predicting the optimal 
-configuration. This is promising for further research into the area.
+be used to correctly predict the optimal big.LITTLE configuration to run an 
+unseen program on. I find that although gem5 can be challenging to use, the 
+simulations are possible and even limited data can be used to create promising 
+models which come close to the ideal performance ratios when predicting the 
+optimal configuration. I achieve geometric means of $\approx 98.77\%$ and 
+$\approx 99.28\%$ for how close the predictions are to the ideal configurations 
+in terms of number maximum of cycles spent and total power used, respectively. 
+This is highly promising for further research into the area.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{result-plots/stock-2b2L/system-scatter.png}
